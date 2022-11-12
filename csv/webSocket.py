@@ -26,7 +26,7 @@ async def get_stream(websocket, path):
                 print("the number of record is "+str(count))
                 result = result[:-1]
                 result += "]"
-                createFile('example.xml',result) 
+                createFile('example.csv',result) 
                 # the name of file should be decided by the user
                 reply = f"The transform ends successfully"
                 await websocket.send(reply)
