@@ -16,7 +16,7 @@ mycursor.execute("CREATE TABLE Domain (id INT AUTO_INCREMENT PRIMARY KEY, domain
 mycursor.execute("CREATE TABLE Sub_Domain (id INT AUTO_INCREMENT PRIMARY KEY, domain_id INT,sub_domain VARCHAR(255), created_at DATETIME,updated_at DATETIME, FOREIGN KEY (domain_id) REFERENCES Domain(id))")
 mycursor.execute("CREATE TABLE Dataset (id INT AUTO_INCREMENT PRIMARY KEY, user_id INT, title VARCHAR(255), description VARCHAR(255), domain_id INT, sub_domain_id INT,dataset_file_name VARCHAR(255),host_link VARCHAR(255),price DECIMAL, license VARCHAR(255), published_by VARCHAR(255),last_updated_date  DATETIME,created_at DATETIME,updated_at DATETIME, FOREIGN KEY (user_id) REFERENCES User(id), FOREIGN KEY (domain_id) REFERENCES Domain(id),FOREIGN KEY (sub_domain_id) REFERENCES Sub_Domain(id))")
 mycursor.execute("CREATE TABLE Keyword_Inverted_Index (keyword VARCHAR(255), dataset_id INT,FOREIGN KEY (dataset_id) REFERENCES Dataset(id))")
-mycursor.execute("CREATE TABLE Quality_information_Metadata (total_records INT, total_columns INT, dataset_id INT, FOREIGN KEY (dataset_id) REFERENCES Dataset(id))")
+mycursor.execute("CREATE TABLE Quality_information_Metadata (dataset_id INT,total_records INT, total_columns INT,file_size DECIMAL,completeness DECIMAL,summary VARCHAR(255),sample JSON,FOREIGN KEY (dataset_id) REFERENCES Dataset(id))")
 """
 mycursor.execute("DESCRIBE User")
 #print(mycursor.description)

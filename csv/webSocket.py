@@ -3,6 +3,8 @@
 import asyncio
 import websockets
 import pandas as pd
+import uuid
+
 
 def createFile(name,lines):
     try:
@@ -17,6 +19,7 @@ async def get_stream(websocket, path):
     print(data)
     result = "["
     count = 0
+    unique_filename = str(uuid.uuid4())
     try:
         while True:
             contents = await websocket.recv()
@@ -26,7 +29,7 @@ async def get_stream(websocket, path):
                 print("the number of record is "+str(count))
                 result = result[:-1]
                 result += "]"
-                createFile('example.csv',result) 
+                createFile(unique_filename+".csv",result) #change the file name
                 # the name of file should be decided by the user
                 reply = f"The transform ends successfully"
                 await websocket.send(reply)
