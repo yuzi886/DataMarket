@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web form</title>
+</head>
+<body>
+    <form action="addData" method="post">
+        {% csrf_token %}
+        Title:<input name="title"><br>
+        File name:<input name="file_name">
+        <br>
+        License:<input name="license"><br>
+        Published by:<input name="published_by">
+        <br>
+        last update date:<input name="last_update_date"><br>
+        Price:<input name="price">
+        <br>
+        Description:<br>
+        <input name="description" style="font-size:50pt">
+        <br><br>
+        <!-- File path:
+        <input name="file_path">
+        <br><br>-->
+
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
