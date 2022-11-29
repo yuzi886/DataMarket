@@ -1,0 +1,44 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="menu">
+        <div class="show">
+            <form action="" method="post">
+                {% csrf_token %}
+                <select name="domain" id="domain">
+                    {% for d in domains %}
+                    <option value = {{d}}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+            <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+    <div class = "table">
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Completeness</th>
+            <th>price</th>
+        </tr>
+        {% for data in metadata %}
+        <tr>
+            <td>{{ data.id }}</td>
+            <td>{{ data.description }}</td>
+            <td>{{ data.completeness }}</td>
+            <td>{{ data.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</body>
+
+</html>
