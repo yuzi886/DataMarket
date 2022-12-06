@@ -9,23 +9,25 @@
   </head>
 
   <body>
-    <!-- <div class="dropdown">
-    <form action="dataList/" method="post">
-    <a>Domain:</a>
-	<<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-	  Select domain...
-	</button>
-	{% csrf_token %}
-	<ul class="dropdown-menu">
-		{% for d in domains %}
-		<li><a class="dropdown-item" name="domain" value ={{d}} >{{ d }}</a></li>
-		{% endfor %}
-	</ul>
-	</form> -->
-	<nav class="navbar navbar-expand-lg bg-light d-flex justify-content-around">
+  
+	<!-- first nav bar-->
+	<nav class="navbar bg-light">
+	  <div class="search_bar" >
+			<form action="" method="post" class="d-flex" role="search">
+				{% csrf_token %}
+	        <input class="form-control me-2" type="search" placeholder="Type keywords of title, description,seller name" aria-label="Search" size="40" name="search1">
+	        <input class="form-control me-1" type="search" placeholder="Type keywords of column name" aria-label="Search" size="40" name="search2">
+	        <button class="btn btn-outline-success" type="submit">Search</button>
+			</form>
+		</div>
+	</nav>
+
+	<!-- second nav bar-->
+	<!--<nav class="navbar navbar-expand-lg bg-light d-flex justify-content-around"> -->
+	<nav class="navbar navbar-expand-lg bg-light d-flex justify-content-start">
 		<div class="dropdown ">
 	    <form action="" method="post">
-	    <a>Domain: </a>
+	    <a>&nbsp</a>
 	    {% csrf_token %}
 		<select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="domain" onchange="this.form.submit();">
 			<option disabled selected value style="display: none;">Select domain...</option>
@@ -38,6 +40,7 @@
 
 		<div class="sort ">
 	    <form action="" method="post">
+	    <a>&nbsp &nbsp</a>
 	    {% csrf_token %}
 		<select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="sort" onchange="this.form.submit();">
 			<option disabled selected value style="display: none;">Sort by...</option>
@@ -48,25 +51,35 @@
 		</form>
 		</div>
 
-		<div class="search_bar" >
+		<!--<div class="search_bar" >
 			<form action="" method="post" class="d-flex" role="search">
 				{% csrf_token %}
-	        <input class="form-control me-2" type="search" placeholder="Type keywords to search in title, description,seller name" aria-label="Search" size="40" name="search">
+	        <input class="form-control me-2" type="search" placeholder="keywords of title, description,seller name" aria-label="Search" size="40" name="search1">
+	        <input class="form-control me-1" type="search" placeholder="Type keywords of column name" aria-label="Search" size="40" name="search2">
 	        <button class="btn btn-outline-success" type="submit">Search</button>
 			</form>
-		</div>
+		</div>-->
 	</nav>
 
-	<div class="product-list d-flex justify-content-evenly d-grid gap-3">
+	<div class="product-list"> <!-- d-flex justify-content-evenly d-grid gap-3-->
 		{% for data in metadata %}
 		<div class="border border-success p-2 mb-2 border-3 rounded-5 w-25 p-3 h-50 d-inline-block">
 	        <p>{{ data.title }}</p>
-	        <p>datamarket</p>
+	        <p>{{ data.pub_by}}</p>
 	        <p>{{ data.price }}</p>
-	        <p>more information</p>
+	        <a href="detail/{{data.id}}">more information</a>
 		</div>
 		{% endfor %}
 	</div>
+
+	{% if messages %}
+		<script>
+			{% for msg in messages %}
+	       alert('{{ msg.message }}');
+	    {% endfor %}
+	  </script>
+	{% endif %}
+
 
   </body>
 </html>

@@ -9,21 +9,40 @@
   </head>
 
   <body>
-    <table class="table table-striped-columns">
-    	<tr>
-            <th>Title</th>
-            <th>Seller name</th>
-            <th>Price</th>
-            <th>Url</th>
+  	<div class="dataDetail"> <!-- d-flex justify-content-evenly d-grid gap-3-->
+			{% for data in metadata %}
+			<div class="border border-success">
+        <div class="title ">
+          <p>Title: {{ data.title }}</p>
+          <p>Seller name: {{ data.pub_by}}</p>
+          <p>Price: ￡{{ data.price }}</p>
+          <p>File Size: {{ data.file_size}}</p>
+          <p>Total columns: {{ data.total_columns}}</p>
+          <p>Total records: {{ data.total_records}}</p>
+        </div>
+	    	<table class="table table-striped-columns">
+        
+    		<tr>
+            <th>Column Name</th>
+            <th>Mean</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th>Distict</th>
+            <th>Std</th>
+            <th>Type</th>
+            <th>Missing</th>
         </tr>
-        {% for data in metadata %}
+        {% for key, value in column.items %}
         <tr>
-            <td>{{ data.title }}</td>
-            <td>default</td>
-            <td>{{ data.price }}</td>
-            <td>more information</td>
+            <td>{{key}}</td>
+            {% for v in value %}
+              <td>{{v}}</td>
+            {% endfor %}
         </tr>
         {% endfor %}
 		</table>
+		</div>
+		{% endfor %}
+	</div>
   </body>
 </html>
