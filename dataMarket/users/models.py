@@ -107,10 +107,7 @@ class Dataset(models.Model, TimeStamps):
 		blank=True,
 		default=0,
 	)
-	total_columns = models.IntegerField(
-		blank=True,
-		default=0,
-	)
+	
 	file_size = models.DecimalField(
 		max_digits=8, 
 		decimal_places=2,

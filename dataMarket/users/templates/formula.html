@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--<meta http-equiv="X-UA-Compatible" content="ie=edge" />-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+    <!--<link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />-->
+    <title>Data Quality Formula</title>
+    <style type="text/css">
+      mark.blue {
+        font-size:12px;
+        color:#0000A0;
+        background: none;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container my-5">
+      <h1 class="text-center">Data Quality Formula</h1>
+      <form action="/users/formula/add/" method="post">
+      {% csrf_token %}
+      <table class="table table-bordered">
+        <tbody>
+          <tr>
+            <td>Total Completeness:<br/><mark class="blue">Please  specify the % of  empty/null <br/>values  in  the entire  dataset. </mark></td>
+            <td colspan="3" class="table-active">
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <a> Total completeness  % ></a></div>
+                <div class="p-2">
+                  <input type="number" class="form-control" name="t_c" id="t_c" />
+                </div>
+              </div>
+            </td>
+
+            <td>
+             <div class="weight">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="t_c_w">
+                <option disabled selected value style="display: none;">Weight</option>
+                {% for c in choices %}
+                <option value ={{c}}>{{ c }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Column Completeness:<br/><mark class="blue">Please  specify the %  of  empty/null<br/>  values  in  specific  column.</mark></td>
+            <td colspan="3" class="table-active">
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="c_column_name">
+                <option disabled selected value style="display: none;">Select column..</option>
+                  <option value ="undefine">undefined</option>
+                </select>
+                </div>
+                <div class="p-2 ">
+                  <a> Column completeness  % ></a>
+                </div>
+                <div class="p-2">
+                  <input type="number" class="form-control" name="c_c" id="c_c" />
+                </div>
+              </div>
+            </td>
+            
+            <td>
+              <div class="weight">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="c_c_w">
+                <option disabled selected value style="display: none;">Weight</option>
+                {% for c in choices %}
+                <option value ={{c}}>{{ c }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Freshness:<br/><mark class="blue">Please  specify the required  date  for <br/>which the data  is  added to  the <br/>marketplace and when  it  was last  <br/>modified.</mark></td>
+            <td colspan="3" class="table-active">
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <a> Added date </a>
+                </div>
+                <div class="p-2">
+                  <input type="date" id="a_d" name = "a_d">
+                </div>
+                <div class="p-2 ">
+                  <a> last modified date </a>
+                </div>
+                <div class="p-2">
+                  <input type="date" id="l_m_d" name = "l_m_d">
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="weight">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="f_w">
+                <option disabled selected value style="display: none;">Weight</option>
+                {% for c in choices %}
+                <option value ={{c}}>{{ c }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>Accuracy:<br/><mark class="blue">Please  specify the column  name  and <br/>the accuracy  condition for which the <br/>values  will  be  considered as  accurate <br/>  or  not accurate. </mark></td>
+            <td colspan="3" class="table-active">
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_column_name">
+                <option disabled selected value style="display: none;">Select column..</option>
+                  <option value ="undefine">undefined</option>
+                </select>
+                </div>
+                <div class="p-2 ">
+                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_condition">
+                  <option disabled selected value style="display: none;">Select condition..</option>
+                  <option value ="undefine">undefined</option>
+                </select>
+                </div>
+                <div class="p-2">
+                  <input type="text" id="a_text" name = "a_text">
+                </div>
+              </div>
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <a> Accuracy  % > </a>
+                </div>
+                <div class="p-2">
+                  <input type="number" id="a_p" name = "a_p">
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="weight">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_w">
+                <option disabled selected value style="display: none;">Weight</option>
+                {% for c in choices %}
+                <option value ={{c}}>{{ c }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </td>
+          </tr>
+           <tr>
+            <td>Uniqueness:<br/><mark class="blue">Please  specify the column  name  and <br/>how many  unique  values  is acceptable  <br/>for you.</mark></td>
+             <td colspan="3" class="table-active">
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_column_name">
+                <option disabled selected value style="display: none;">Select column..</option>
+                  <option value ="undefine">undefined</option>
+                </select>
+                </div>
+                <div class="p-2 ">
+                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_condition">
+                  <option disabled selected value style="display: none;">Select condition..</option>
+                  <option value ="undefine">undefined</option>
+                </select>
+                </div>
+                <div class="p-2">
+                  <input type="text" id="u_text" name = "u_text">
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="weight">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_w">
+                <option disabled selected value style="display: none;">Weight</option>
+                {% for c in choices %}
+                <option value ={{c}}>{{ c }}</option>
+                {% endfor %}
+                </select>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="text-center">
+        <button class="btn btn-primary" type="submit">Checkout</button>
+      </div>
+    </div>
+    </form>
+  </body>
+</html>
