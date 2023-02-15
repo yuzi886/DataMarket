@@ -74,9 +74,9 @@ def index(request):
 		sort = request.POST.get('sort','')
 		search1 = request.POST.get('search1','')
 		search2 = request.POST.get('search2','')
-		f_s = request.POST.get('f_s','')
-		n_r = request.POST.get('n_r','')
-		n_c = request.POST.get('n_c','')
+		"""f_s = request.POST.get('f_s','')
+								n_r = request.POST.get('n_r','')
+								n_c = request.POST.get('n_c','')"""
 		if domain != '':#for get all domain name 
 			domain_id = Domain.objects.filter(name=domain).values()
 			data = Dataset.objects.filter(domain_id = domain_id[0]['id'])
@@ -150,14 +150,14 @@ def index(request):
 			context["metadata"]=data
 
 		#print(type(data))
-		if data != None:
-			if f_s != '':
-				data = data.filter(file_size__gt = f_s)
-			if n_r != '':
-				data = data.filter(total_records__gt = n_r)
-			if n_c != '':
-				data = data.filter(total_columns__gt = n_c)
-			context["metadata"]=data
+		"""if data != None:
+									if f_s != '':
+										data = data.filter(file_size__gt = f_s)
+									if n_r != '':
+										data = data.filter(total_records__gt = n_r)
+									if n_c != '':
+										data = data.filter(total_columns__gt = n_c)
+									context["metadata"]=data"""
 
 
 
@@ -212,31 +212,41 @@ def add_cart(request,ID):
 	global cart_list
 	#cart_list.append(ID)
 	selected_options = request.POST.getlist('checkbox',[])
-	record_n = request.POST.get('n_r_b','')
-	if record_n == '' or selected_options == []:
-		messages.warning(request, "the column choice and number of record can't be empty")
+	#record_n = request.POST.get('n_r_b','')
+	#if record_n == '' or selected_options == []:
+	if selected_options == []:
+		messages.warning(request, "the column choice can't be empty")
 		return redirect(request.META.get('HTTP_REFERER', '/detail/{ID}/'))
-
-	detail = [record_n,selected_options]
-	cart_list.append({ID:detail})
+	
+	cart_list.append({ID:selected_options})
 
 	print(cart_list)
 	return redirect("http://127.0.0.1:8000/users")
 
 def shop_cart(request):
+	global cart_list
 	context ={}
+	data_list =[]
+	"""for key,value in cart_list.items():
+					data = Dataset.objects.get(id = key)
+					data_list.append({data:values})"""
 	template = loader.get_template('shop_cart.html')
 	return HttpResponse(template.render(context,request))
 
 def formula(request):
 	context ={}
-	context["choices"]=[1,2,3,4,5,6,7,8,9]
+	context["choices"]= [1,2,3,4,5,6,7,8,9]
 	template = loader.get_template('formula.html')
 	return HttpResponse(template.render(context,request))
 
 def formula_add(request):
-	print("in")
+	#print("in")
 	record_n = request.POST.get('f_w','')
-	return redirect("http://127.0.0.1:8000/users")
+	return redirect("../../data_quality")
+
+def data_quality(request):
+	context ={}
+	template = loader.get_template('data_quality.html')
+	return HttpResponse(template.render(context,request))
 
 
