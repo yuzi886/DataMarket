@@ -11,7 +11,7 @@ from django.contrib import messages
 import json
 import csv
 import os
-
+from django.core.cache import cache
 
 data = None
 #keyword_set = {}
@@ -19,6 +19,14 @@ keyword__domain = {}
 #IDS = {} #store matching level between searching word and all dataset
 domain =""
 cart_list = []
+
+def get_ip(request):
+	x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')  # 判断是否使用代理
+	if x_forwarded_for:
+		ip = x_forwarded_for.split(',')[0]  # 使用代理获取真实的ip
+	else:
+		ip = request.META.get('REMOTE_ADDR')  # 未使用代理获取IP
+	return ip
 
 def search(kw):
 	global data
@@ -92,33 +100,31 @@ def index(request):
 			context["metadata"]=data
 		elif search1 != ''and data != None:
 			#seach algorithms 
-			if domain not in keyword__domain:
-				keyword_set = {}
-			#if len(keyword_set) == 0:
-				#dataset = Dataset.objects.all()
-				for d in data:
-					sentence = ''
-					#do not add seller name in sentence, because not store user name
-					sentence = sentence + d.title+" "+d.description+" "+ d.pub_by+" "
-					keywords = kg.extact(sentence)
-					for k in keywords: # get every keyword from the the database
-						if k in keyword_set:# if the keyword exist
-							if d.id in keyword_set[k]:
-								#if the keyword exist and id already recorded, the frequency increase
-								keyword_set[k][d.id]+=1
-							else:
-								#if the keyword exist and id isn't recorded, record it 
-								keyword_set[k][d.id] = 1
+			#if domain not in keyword__domain: 
+			keyword_set = {}
+			for d in data:
+				sentence = ''
+				#do not add seller name in sentence, because not store user name
+				sentence = sentence + d.title+" "+d.description+" "+ d.pub_by+" "
+				keywords = kg.extact(sentence)
+				for k in keywords: # get every keyword from the the database
+					if k in keyword_set:# if the keyword exist
+						if d.id in keyword_set[k]:
+							#if the keyword exist and id already recorded, the frequency increase
+							keyword_set[k][d.id]+=1
 						else:
-							keyword_set[k] = {d.id:1}
+							#if the keyword exist and id isn't recorded, record it 
+							keyword_set[k][d.id] = 1
+					else:
+						keyword_set[k] = {d.id:1}
 					#IDS[d.id] = 0
-				keyword__domain[domain] = keyword_set
+				#keyword__domain[domain] = keyword_set
 				#print(keyword_set)
 
 
 			# processed input query and displays candidate datasets
 			IDS = {}
-			keyword_set = keyword__domain[domain]
+			#keyword_set = keyword__domain[domain]
 			search_word_set = kg.extact(search1)
 			for w in search_word_set:
 				if w in keyword_set:
@@ -169,6 +175,7 @@ def index(request):
 	template = loader.get_template('first.html')
 	context["domains"]=domains
 	template = loader.get_template('first.html')
+	#cache.set('guest', '1',3600)
 	return HttpResponse(template.render(context, request))
 
 
@@ -182,6 +189,7 @@ def detail(request,ID):
 
 	context["metadata"]=data
 	template = loader.get_template('dataList.html')
+	print(cache.get('guest'))
 	return HttpResponse(template.render(context,request))
 
 def download(request,ID):
@@ -209,18 +217,24 @@ def download(request,ID):
 		raise Http404
 
 def add_cart(request,ID):
-	global cart_list
-	#cart_list.append(ID)
+	#global cart_list
+	ip = get_ip(request)
+	cart_list = cache.get(ip)
+	if cart_list is None:
+		cart_list = {}
+
 	selected_options = request.POST.getlist('checkbox',[])
-	#record_n = request.POST.get('n_r_b','')
-	#if record_n == '' or selected_options == []:
+
 	if selected_options == []:
 		messages.warning(request, "the column choice can't be empty")
 		return redirect(request.META.get('HTTP_REFERER', '/detail/{ID}/'))
-	
-	cart_list.append({ID:selected_options})
+
+	cart_list[ID]= selected_options
 
 	print(cart_list)
+
+	cache.set(ip,cart_list ,3600)
+
 	return redirect("http://127.0.0.1:8000/users")
 
 def shop_cart(request):
@@ -233,19 +247,43 @@ def shop_cart(request):
 	template = loader.get_template('shop_cart.html')
 	return HttpResponse(template.render(context,request))
 
-def formula(request):
+def formula(request,ID,col):
 	context ={}
 	context["choices"]= [1,2,3,4,5,6,7,8,9]
+	context["col"] = col
+
 	template = loader.get_template('formula.html')
 	return HttpResponse(template.render(context,request))
 
-def formula_add(request):
-	#print("in")
-	record_n = request.POST.get('f_w','')
-	return redirect("../../data_quality")
+def formula_add(request,ID,col):
+	complet_rate = request.POST.get('c_c','')
+	complet_weight =  request.POST.get('c_c_w','')
+	expire_time = request.POST.get('e_t','')
+	fresh_weight = request.POST.get('f_w','')
+	accuracy_condition = request.POST.get('a_condition','')
+	accuracy_input = request.POST.get('a_text','')
+	accuracy_rate =request.POST.get('a_p','')
+	accuracy_weight =request.POST.get('a_w','')
+	unique_condition = request.POST.get('u_condition','')
+	unique_input = request.POST.get('u_condition','')
+	unique_weight= request.POST.get('u_w','')
+
+	#formula = {"Completeness":[complet_rate,complet_weight],"Freshness":[expire_time,fresh_weight],"Accuracy":[]}
+	return redirect("../../../")
 
 def data_quality(request):
-	context ={}
+	context={}
+	ip = get_ip(request)
+	cart_list = cache.get(ip)
+	if cart_list is None:
+		cart_list = {}
+	cart={}
+
+
+	for key,value in cart_list.items():
+		data = Dataset.objects.get(id = key)
+		cart[data] = value
+	context["cart"] =cart
 	template = loader.get_template('data_quality.html')
 	return HttpResponse(template.render(context,request))
 

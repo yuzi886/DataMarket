@@ -7,9 +7,9 @@ urlpatterns = [
     path('download/<ID>/', views.download, name='download'),
     path('add_cart/<ID>/', views.add_cart, name='add_cart'),
     path('shop_cart/',views.shop_cart, name = 'shop_cart'),
-    path('formula/',views.formula, name = 'formula'),
-    path('formula/add/',views.formula_add, name = 'formula_add'),
-    path('data_quality/',views.data_quality, name = 'data_quality')
+    path('data_quality/',views.data_quality, name = 'data_quality'),
+    path('data_quality/<ID>/<col>/',views.formula, name = 'formula'),
+    path('data_quality/<ID>/<col>/add/',views.formula_add, name = 'formula_add'),
 ]
 """    path('seller/', views.seller, name='seller'),
     path('seller/addData', views.addData, name='addData'),
