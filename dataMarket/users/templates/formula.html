@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
+
     <title>Data Quality Formula</title>
     <style type="text/css">
       mark.blue {
@@ -57,7 +58,7 @@
             </td>
           </tr>-->
           <tr>
-            <td>Column Completeness:<br/><mark class="blue">Please  specify the %  of  empty/null<br/>  values  in  specific  column.</mark></td>
+            <td>Column Completeness:<mark class="blue">Please  specify the %  of  empty/null  values  in  specific  column.</mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <!--<div class="p-2 ">
@@ -87,21 +88,28 @@
             </td>
           </tr>
           <tr>
-            <td>Freshness:<br/><mark class="blue">Please  specify the required  date  for <br/>which the data  is  unvalid</mark></td>
+            <td>Freshness:<br/><mark class="blue">Please  specify the typical time period the column maintain validity <br/>  </mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <div class="p-2 ">
-                  <a> Expiry Time </a>
+                  <a> Volatility: </a>
                 </div>
-                <div class="p-2">
-                  <input type="date" id="e_t" name = "e_t">
+                <div class="p-2  col-2 ">
+                  <input class="form-control" type="num" id="v_y" name = "v_y" >
+                  <a >Year</a>
                 </div>
-                <!--<div class="p-2 ">
-                  <a> </a>
+                <div class="p-2 col-2">
+                  <input class="form-control" type="num" id="v_m" name = "v_m" >
+                   <a >Month</a>
                 </div>
-                <div class="p-2">
-                  <input type="date" id="l_m_d" name = "l_m_d">
-                </div>-->
+                <div class="p-2 col-2">
+                  <input class="form-control" type="num" id="v_d" name = "v_d" >
+                   <a >Day</a>
+                </div>
+                <div class="p-2 col-2">
+                  <input class="form-control" type="num" id="v_h" name = "v_h" >
+                   <a >Hour</a>
+                </div>
               </div>
               <div class="d-flex">
                 <div class="p-2 ">

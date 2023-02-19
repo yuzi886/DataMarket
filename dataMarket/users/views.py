@@ -251,7 +251,7 @@ def shop_cart(request):
 
 def formula(request,ID,col):
 	context ={}
-	context["choices"]= [10,20,30,40,50,60,70,80,90]
+	context["choices"]= [0,10,20,30,40,50,60,70,80,90]
 	context["col"] = col
 
 	template = loader.get_template('formula.html')
@@ -264,13 +264,18 @@ def formula_add(request,ID,col):
 	complet_weight =  request.POST.get('c_c_w','')
 	complet_weight = int(complet_weight) if len(complet_weight) != 0 else 0
 
-	expire_time = request.POST.get('e_t','')
-	if len(expire_time) == 0 :
-		messages.warning(request, "the expire_time should not be empty")
-		return redirect(request.META.get('HTTP_REFERER', '..'))
-	e_t = datetime.strptime(expire_time, '%Y-%m-%d')
-	t_zone = pytz.utc
-	expire_time = t_zone.localize(e_t)
+	"""expire_time = request.POST.get('e_t','')
+				if len(expire_time) == 0 :
+					messages.warning(request, "the expire_time should not be empty")
+					return redirect(request.META.get('HTTP_REFERER', '..'))
+				e_t = datetime.strptime(expire_time, '%Y-%m-%d')
+				t_zone = pytz.utc
+				expire_time = t_zone.localize(e_t)"""
+
+	volatility_y = request.POST.get('v_y','')
+	complet_weight = int(complet_weight) if len(complet_weight) != 0 else 0
+
+	"""futher defined the format of input"""
 
 	fresh_rate = request.POST.get('f_p','')
 	fresh_rate = float(fresh_rate) if len(fresh_rate) != 0 else 0
@@ -319,15 +324,15 @@ def formula_add(request,ID,col):
 	This formula is for the freshness point of the column
 	"""
 	#print((data.updated_at).tzinfo)
-	Age = (timezone.now() - data.pub_date )
-	Currency = data.pub_date - data.updated_at + Age
-	Volatility = expire_time - data.updated_at + Age
-	Timeliness = max(1- Currency/Volatility,0)*100
-	print("Timeliness:"+str(Timeliness))
-	if Timeliness >fresh_rate:
-		time_point =1
-	else:
-		time_point =0
+	"""Age = (timezone.now() - data.pub_date )
+				Currency = data.pub_date - data.updated_at + Age
+				Volatility = expire_time - data.updated_at + Age
+				Timeliness = max(1- Currency/Volatility,0)*100
+				print("Timeliness:"+str(Timeliness))
+				if Timeliness >fresh_rate:
+					time_point =1
+				else:
+					time_point =0"""
 
 	"""
 	This formula is for the accuracy point of the column
