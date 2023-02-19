@@ -97,11 +97,19 @@
                   <input type="date" id="e_t" name = "e_t">
                 </div>
                 <!--<div class="p-2 ">
-                  <a> last modified date later than:</a>
+                  <a> </a>
                 </div>
                 <div class="p-2">
                   <input type="date" id="l_m_d" name = "l_m_d">
                 </div>-->
+              </div>
+              <div class="d-flex">
+                <div class="p-2 ">
+                  <a> Freshness  % > </a>
+                </div>
+                <div class="p-2">
+                  <input type="number" id="f_p" name = "f_p">
+                </div>
               </div>
             </td>
             <td>
@@ -116,7 +124,7 @@
             </td>
           </tr>
           <tr>
-            <td>Accuracy:<br/><mark class="blue">Please  specify the accuracy  condition of this column  <br/>for which the values  will  be  considered as  accurate <br/>  or  not accurate. </mark></td>
+            <td>Accuracy:<br/><mark class="blue">Please  specify the accuracy  condition of  <br/>this column for which the values  will  be  considered as  accurate  or  not accurate. </mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                  <!--<div class="p-2 ">
@@ -201,7 +209,7 @@
             </td>
           </tr>
            <tr>
-            <td>Uniqueness:<br/><mark class="blue">Please  specify how many  unique  values  is acceptable  <br/>for you.</mark></td>
+            <td>Uniqueness:<br/><mark class="blue">Please  specify how many  unique  values  is acceptable for you.</mark></td>
              <td colspan="3" class="table-active">
               <div class="d-flex">
                 <!--<div class="p-2 ">
@@ -216,13 +224,13 @@
                 <div class="p-2 ">
                   <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_condition">
                   <option disabled selected value style="display: none;">Select condition..</option>
-                  <option value ="bigger">></option>
-                  <option value ="smaller"><</option>
-                  <option value ="equal">=</option>
+                  <option value ="bigger">more than</option>
+                  <option value ="smaller">less than</option>
+                  <option value ="equal">equal</option>
                 </select>
                 </div>
                 <div class="p-2">
-                  <input type="text" id="u_text" name = "u_text">
+                  <input type="number" id="u_text" name = "u_text">
                 </div>
               </div>
             </td>
@@ -249,5 +257,12 @@
         $('#myModal').modal('show');
       });
     </script>
+    {% if messages %}
+    <script>
+      {% for msg in messages %}
+         alert('{{ msg.message }}');
+      {% endfor %}
+    </script>
+  {% endif %}
   </body>
 </html>

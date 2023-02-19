@@ -12,6 +12,8 @@ import json
 import csv
 import os
 from django.core.cache import cache
+from django.utils import timezone
+import pytz
 
 data = None
 #keyword_set = {}
@@ -249,7 +251,7 @@ def shop_cart(request):
 
 def formula(request,ID,col):
 	context ={}
-	context["choices"]= [1,2,3,4,5,6,7,8,9]
+	context["choices"]= [10,20,30,40,50,60,70,80,90]
 	context["col"] = col
 
 	template = loader.get_template('formula.html')
@@ -257,18 +259,100 @@ def formula(request,ID,col):
 
 def formula_add(request,ID,col):
 	complet_rate = request.POST.get('c_c','')
+	complet_rate = float(complet_rate) if len(complet_rate) != 0 else 0
+
 	complet_weight =  request.POST.get('c_c_w','')
+	complet_weight = int(complet_weight) if len(complet_weight) != 0 else 0
+
 	expire_time = request.POST.get('e_t','')
+	if len(expire_time) == 0 :
+		messages.warning(request, "the expire_time should not be empty")
+		return redirect(request.META.get('HTTP_REFERER', '..'))
+	e_t = datetime.strptime(expire_time, '%Y-%m-%d')
+	t_zone = pytz.utc
+	expire_time = t_zone.localize(e_t)
+
+	fresh_rate = request.POST.get('f_p','')
+	fresh_rate = float(fresh_rate) if len(fresh_rate) != 0 else 0
+
 	fresh_weight = request.POST.get('f_w','')
+	fresh_weight = int(fresh_weight) if len(fresh_weight) != 0 else 0
+
 	accuracy_condition = request.POST.get('a_condition','')
 	accuracy_input = request.POST.get('a_text','')
 	accuracy_rate =request.POST.get('a_p','')
-	accuracy_weight =request.POST.get('a_w','')
-	unique_condition = request.POST.get('u_condition','')
-	unique_input = request.POST.get('u_condition','')
-	unique_weight= request.POST.get('u_w','')
 
-	#formula = {"Completeness":[complet_rate,complet_weight],"Freshness":[expire_time,fresh_weight],"Accuracy":[]}
+	accuracy_weight =request.POST.get('a_w','')
+	accuracy_weight = int(accuracy_weight) if len(accuracy_weight) != 0 else 0
+
+	unique_condition = request.POST.get('u_condition','')
+
+	unique_input = request.POST.get('u_text','')
+	unique_input = int(unique_input) if len(unique_input) != 0 else 0
+
+
+	unique_weight= request.POST.get('u_w','')
+	unique_weight = int(unique_weight) if len(unique_weight) != 0 else 0
+
+	data = Dataset.objects.get(id = ID)
+	"""
+	col_detail contain [mean(index=0),min(index=1),max(index=2),distict(index=3), 
+						std(index=4),type(index=5),missing_num(index=6)]
+	"""
+	col_detail = (data.column_summary)[col] 
+
+	if complet_weight+fresh_weight+accuracy_weight+unique_weight != 100 :
+		messages.warning(request, "The sum of weight must be equal to 100. Please write again ")
+		return redirect(request.META.get('HTTP_REFERER', '..'))
+	
+	"""
+	This formula is for the completness point of the column
+	"""
+	completness = ((data.total_records -col_detail[6])/data.total_records)*100
+	print("completness:"+str(completness))
+	if completness >= complet_rate:
+		complet_point = 1
+	else:
+		complet_point = 0
+
+	"""
+	This formula is for the freshness point of the column
+	"""
+	#print((data.updated_at).tzinfo)
+	Age = (timezone.now() - data.pub_date )
+	Currency = data.pub_date - data.updated_at + Age
+	Volatility = expire_time - data.updated_at + Age
+	Timeliness = max(1- Currency/Volatility,0)*100
+	print("Timeliness:"+str(Timeliness))
+	if Timeliness >fresh_rate:
+		time_point =1
+	else:
+		time_point =0
+
+	"""
+	This formula is for the accuracy point of the column
+	"""
+
+	"""
+	This formula is for the Uniqueness point of the column
+	"""
+	if unique_condition == 'bigger':
+		if unique_input >col_detail[3]: 
+			unique_point = 1
+		else:
+			unique_point = 0
+	elif unique_condition == 'smaller':
+		if unique_input <col_detail[3]: 
+			unique_point = 1
+		else:
+			unique_point = 0
+	else:
+		if unique_input == col_detail[3]: 
+			unique_point = 1
+		else:
+			unique_point = 0
+	print("Uniqueness:"+str(unique_point))
+	
 	return redirect("../../../")
 
 def data_quality(request):

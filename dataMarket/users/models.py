@@ -11,7 +11,7 @@ class TimeStamps():
 				updated_at = models.DateTimeField(auto_now=True,)"""
 
 """Dataset Domain Model"""
-class Domain(models.Model, TimeStamps):
+class Domain(models.Model):
 	id = models.AutoField(primary_key=True,)
 	name = models.CharField(
 		max_length=100,
@@ -21,7 +21,7 @@ class Domain(models.Model, TimeStamps):
 	def __str__(self) -> str:
 		return self.name
 
-class Sub_Domain(models.Model, TimeStamps):
+"""class Sub_Domain(models.Model, TimeStamps):
 #Dataset Sub Domain Model
 	id = models.AutoField(primary_key=True)
 	name = models.CharField(
@@ -47,9 +47,9 @@ class Task(models.Model, TimeStamps):
 		unique=True,
 	)
 	def __str__(self) -> str:
-		return self.name
+		return self.name"""
 
-class Dataset(models.Model, TimeStamps):
+class Dataset(models.Model):
 #Dataset Model
 	id = models.AutoField(primary_key=True,)
 	"""user = models.ForeignKey(
@@ -118,12 +118,12 @@ class Dataset(models.Model, TimeStamps):
 		blank=True,
 		default=0,
 	)
-	completeness = models.DecimalField(
-		max_digits=3, 
-		decimal_places=3,
-		blank=True,
-		default=0.0,
-	)
+	"""completeness = models.DecimalField(
+					max_digits=3, 
+					decimal_places=3,
+					blank=True,
+					default=0.0,
+				)"""
 	timeliness = models.CharField(
 		max_length=200,
 		blank=False,
@@ -134,6 +134,8 @@ class Dataset(models.Model, TimeStamps):
 	column_summary = models.JSONField(
 		blank=True,
 	)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now = True)
 
 	def was_published_recently(self):
 		return self.pub_date >= timezone.now() - datetime.timedelta(days=1)
