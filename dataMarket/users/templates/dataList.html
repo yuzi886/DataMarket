@@ -9,32 +9,42 @@
   </head>
 
   <body>
+    
+    <div class="container">
     <div class="dataDetail"> <!-- d-flex justify-content-evenly d-grid gap-3-->
       {% for data in metadata %}
         <form action="/users/add_cart/{{data.id}}/" method="post">
         {% csrf_token %}
       <!--<div class="border border-success">-->
+        
         <div>
         <div class="title ">
-          <p>Title: {{ data.title }}</p>
-          <p>Seller name: {{ data.pub_by}}</p>
-          <p>Price: ￡{{ data.price }}</p>
-          <p>File Size: {{ data.file_size}}</p>
-          <p>Total columns: {{ data.total_columns}}</p>
-          <p>Total records: {{ data.total_records}}</p>
+         
+          <div class="border border-success rounded mx-auto p-2 rounded-5 border-3">
+            <h1 class="text-success">{{ data.title }}</h1>
+            <p class="p-2 fw-bold text-muted">&nbsp;{{data.description}}</p>
+          </div>
+          <br>
+          <p><strong >Seller name:</strong> &nbsp;&nbsp;{{ data.pub_by}}</p>
+          <p><strong >Price:</strong> &nbsp;&nbsp;￡{{ data.price }}</p>
+          <p><strong >File Size:</strong> &nbsp;&nbsp;{{ file_size}} KB</p>
+          <!--<p>Total columns: {{ data.total_columns}}</p>-->
+          <p><strong >Total records:</strong> &nbsp;&nbsp;{{ data.total_records}}</p>
         </div>
         <table class="table table-striped-columns">
         
         <tr>
             <th></th>
             <th>Column Name</th>
-            <th>Mean</th>
+            <th>Sample Value</th>
+            <!--<th>Mean</th>
             <th>Min</th>
             <th>Max</th>
             <th>Distict</th>
             <th>Std</th>
-            <th>Type</th>
-            <th>Missing</th>
+            <th>Type</th>-->
+            <th>Empty Num</th>
+            <th>Distict Num</th>
         </tr>
         {% for key, value in column.items %}
         <tr>
@@ -63,10 +73,10 @@
         
       <br>
 
-      <div class = "sample" style="text-align: center">
-        <a href="/users/download/{{data.id}}">Request data sample</a>
+      <div class = "sample p-1" style="text-align: center">
+        <a href="/users/download/{{data.id}}">Request more data sample</a>
       </div>
-       <div class = "cart" style="text-align: center">
+       <div class = "cart p-1" style="text-align: center">
         <!--<form action="/users/add_cart/{{data.id}}/" method="post">-->
         
         <button class="add" type="submit">Add to Data Quality cart</button>
@@ -82,6 +92,7 @@
     </div>
   </form>
   </div>
+</div>
   {% if messages %}
     <script>
       {% for msg in messages %}

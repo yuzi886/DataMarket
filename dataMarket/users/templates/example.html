@@ -1,97 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Multiple Tables with Targets</title>
-  <!-- Bootstrap CSS -->
+  <title>Dropdown with Collapse Example in Table</title>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h1 class="text-center my-5">Multiple Tables with Targets</h1>
-    <ul class="nav nav-tabs" id="myTab" role="tablist">
-      <li class="nav-item">
-        <a class="nav-link active" id="table1-tab" data-toggle="tab" href="#table1" role="tab" aria-controls="table1" aria-selected="true">Table 1</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" id="table2-tab" data-toggle="tab" href="#table2" role="tab" aria-controls="table2" aria-selected="false">Table 2</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" id="table3-tab" data-toggle="tab" href="#table3" role="tab" aria-controls="table3" aria-selected="false">Table 3</a>
-      </li>
-    </ul>
-    <div class="tab-content" id="myTabContent">
-      <div class="tab-pane fade show active" id="table1" role="tabpanel" aria-labelledby="table1-tab">
-        <h2 class="my-4">Table 1</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Name</th>
-              <th scope="col">Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>John Doe</td>
-              <td>john.doe@example.com</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Jane Doe</td>
-              <td>jane.doe@example.com</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="tab-pane fade" id="table2" role="tabpanel" aria-labelledby="table2-tab">
-        <h2 class="my-4">Table 2</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Product Name</th>
-              <th scope="col">Price</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Product A</td>
-              <td>$10.00</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Product B</td>
-              <td>$15.00</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="tab-pane fade" id="table3" role="tabpanel" aria-labelledby="table3-tab">
-        <h2 class="my-4">Table 3</h2>
-        <table class="table">
-          <thead>
-            <tr>
-            <th scope="col">ID</th>
-            <th scope="col">City</th>
-            <th scope="col">Population</th>
-            </tr>
-          </thead>
-      <tbody>
-        <tr>
-          <th scope="row">1</th>
-          <td>New York</td>
-          <td>8,175,133</td>
-        </tr>
-        <tr>
-          <th scope="row">2</th>
-          <td>Los Angeles</td>
-          <td>3,971,883</td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="row">
+    <div class="col-md-6">
+      <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
+    </div>
+    <div class="col-md-6">
+      <h1>{{ product.name }}</h1>
+      <p>{{ product.description }}</p>
+      <p>Price: ${{ product.price }}</p>
+      <form action="{% url 'add_to_cart' product.id %}" method="post">
+        {% csrf_token %}
+        <input type="number" name="quantity" value="1" min="1" class="form-control mb-3">
+        <button type="submit" class="btn btn-primary btn-lg">Add to Cart</button>
+      </form>
+    </div>
   </div>
 </div>
-</div>
+</body>
+</html>

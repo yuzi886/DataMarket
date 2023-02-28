@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
-
     <title>Data Quality Formula</title>
     <style type="text/css">
       mark.blue {
@@ -28,7 +27,9 @@
     <div class="container my-5">
       <h1 class="text-center">Data Quality Formula</h1>
       <p class="text-center"> <mark class="warning">The sum of specified weight should be 100. Please specify the right weight number! </mark></p>
-      <p >Column name: <strong>{{col}}</strong> </p>
+      <p >Dataset Name: <strong>{{data}}</strong></p>
+      <p >Column Name: <strong>{{col}}</strong> </p>
+      <p >Column Sample: <mark class="text-success font-weight-bold">{{sample}}</mark> </p>
       <form action="./add/" method="post">
       {% csrf_token %}
 
@@ -58,7 +59,7 @@
             </td>
           </tr>-->
           <tr>
-            <td>Column Completeness:<mark class="blue">Please  specify the %  of  empty/null  values  in  specific  column.</mark></td>
+            <td>Column Completeness:<mark class="blue"><br>Please  specify the %  of  empty/null  values  in  specific  column.</mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <!--<div class="p-2 ">
@@ -71,7 +72,7 @@
                   <a> Column completeness  % ></a>
                 </div>
                 <div class="p-2">
-                  <input type="number" class="form-control" name="c_c" id="c_c" />
+                  <input type="number" class="form-control" name="c_c" id="c_c" min="0" max = "100"/>
                 </div>
               </div>
             </td>
@@ -88,35 +89,35 @@
             </td>
           </tr>
           <tr>
-            <td>Freshness:<br/><mark class="blue">Please  specify the typical time period the column maintain validity <br/>  </mark></td>
+            <td>Timeliness:<br/><mark class="blue">Please  specify the typical time period the column maintain validity <br/>  </mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <div class="p-2 ">
                   <a> Volatility: </a>
                 </div>
                 <div class="p-2  col-2 ">
-                  <input class="form-control" type="num" id="v_y" name = "v_y" >
+                  <input class="form-control" type="number" id="v_y" name = "v_y" min="0" >
                   <a >Year</a>
                 </div>
                 <div class="p-2 col-2">
-                  <input class="form-control" type="num" id="v_m" name = "v_m" >
+                  <input class="form-control" type="number" id="v_m" name = "v_m" min="0" max = "12">
                    <a >Month</a>
                 </div>
                 <div class="p-2 col-2">
-                  <input class="form-control" type="num" id="v_d" name = "v_d" >
+                  <input class="form-control" type="number" id="v_d" name = "v_d" min="0" max = "365">
                    <a >Day</a>
                 </div>
                 <div class="p-2 col-2">
-                  <input class="form-control" type="num" id="v_h" name = "v_h" >
+                  <input class="form-control" type="number" id="v_h" name = "v_h" min="0" max = "24">
                    <a >Hour</a>
                 </div>
               </div>
               <div class="d-flex">
                 <div class="p-2 ">
-                  <a> Freshness  % > </a>
+                  <a> Timeliness  % > </a>
                 </div>
                 <div class="p-2">
-                  <input type="number" id="f_p" name = "f_p">
+                  <input type="number" id="f_p" name = "f_p" min="0" max = "100">
                 </div>
               </div>
             </td>
@@ -145,16 +146,16 @@
                   <p>{{column}}</p>
                 </div>
                 <div class="p-2 ">
-                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_condition">
-                  <option disabled selected value style="display: none;">Select condition..</option>
-                  <option value ="contain">Contain</option>
-                  <option value ="n_contain">not Contain</option>
-                  <option value ="exact">is Exactly</option>
-                  <option value ="less">Less Than</option>
-                  <option value ="higher">Higher Than</option>
-                  <option value ="later">Later Than</option>
-                  <option value ="before">Before</option>
-                </select>
+                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_condition" id="a_condition">
+                    <option disabled selected value style="display: none;">Select condition..</option>
+                    <option value ="contain">Contain</option>
+                    <option value ="n_contain">not Contain</option>
+                    <!--<option value ="exact">is Exactly</option>-->
+                    <option value ="less">Less Than</option>
+                    <option value ="higher">Higher Than</option>
+                    <!--<option value ="later">Later Than</option>
+                    <option value ="before">Before</option>-->
+                  </select>
                 </div>
                 <div class="p-2">
                   <input type="text" id="a_text" name = "a_text">
@@ -178,22 +179,32 @@
                           <p class="small"><strong><kbd>contain</kbd> and <kbd>no contain</kbd> button </strong></p> 
                           <p class="small">---&nbsp;the input box could be inputted any word. </p>
                           <!--<p class="small" style="border: 1px solid black; padding: 5px;">if you want to input multiple word, you could use <code>,,</code> to distingusih each other.</p>-->
-                          <p class="small" >---&nbsp;if you want to input <mark class="bg-warning">multiple word</mark>, you could use <code>,,</code> to distingusih each other.</p>
+                         <!-- <p class="small" >---&nbsp;if you want to input <mark class="bg-warning">multiple word</mark>, you could use <code>,,</code> to distingusih each other.</p>
                           <p class="small" >---&nbsp;if you want to input a <mark class="bg-warning">type of data</mark>, you can input <code>NUM</code>&nbsp;(any number) or <code>CHAR</code>&nbsp;(any char). </p>
-                          <p class="small" style="border: 1px solid green; padding: 5px;" >eg.<mark class="text-success font-weight-bold"> NUM &nbsp,,&nbsp&nbsp/&nbsp&nbsp,,&nbspCHAR </mark>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the column value should contain at least one number, at least one char and "/" symbol </p>
+                          <p class="small" style="border: 1px solid green; padding: 5px;" >eg.<mark class="text-success font-weight-bold"> NUM &nbsp,,&nbsp&nbsp/&nbsp&nbsp,,&nbspCHAR </mark>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the column value should contain at least one number, at least one char and "/" symbol </p>-->
                           <br/>
-                          <br/>
+                         <!-- <br/>
                           <p class="small"><strong><kbd>is exactly</kbd>  button</strong></p> 
                           <p class="small">---&nbsp;the input box could be inputted <code>any word</code>.</p>
-                          <br/>
+                          <br/>-->
                           <br/>
                           <p class="small"><strong><kbd>later than</kbd> and <kbd>before</kbd> button </strong></p> 
-                          <p class="small">---&nbsp;the input box should satisfy the date format <code>(YY/MM/DD)</code> </p>
+                          <p class="small">---&nbsp;the input box should satisfy the date format <code>(data  YY/MM/DD)</code> </p>
                           <p class="small" style="border: 1px solid green; padding: 5px;">eg.<mark class="text-success font-weight-bold"> 2020 / 06 / 10 </mark></p>
+                          <p class="small">---&nbsp;the input box beside <kbd>Column data format</kbd> should type in the date format of sample by <code>Y</code> (year),<code>M</code> (Month),<code>D</code>(day),<code>H</code>c(Hour),<code>M</code>(Minute),<code>S</code>(Second) </p>
+                          <p class="small" style="border: 1px solid green; padding: 5px;">eg. Date sample: "2022-02-25 12:00:00" <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Standard input:<mark class="text-success font-weight-bold">YYYY-MM-DD HH:MM:SS</mark></p>
                         </div>
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
+              <div class="collapse row" id="data_format">
+                <div class="col-4">
+                  <a>&nbsp;&nbsp; Sample date format: </a>
+                </div>
+                <div class="col-2">
+                  <input type="text" name = "c_d_f" placeholder="eg.YYYY-MM-DD">
                 </div>
               </div>
               <div class="d-flex">
@@ -201,7 +212,7 @@
                   <a> Accuracy  % > </a>
                 </div>
                 <div class="p-2">
-                  <input type="number" id="a_p" name = "a_p">
+                  <input type="number" id="a_p" name = "a_p" min="0" max = "100">
                 </div>
               </div>
             </td>
@@ -271,6 +282,17 @@
          alert('{{ msg.message }}');
       {% endfor %}
     </script>
-  {% endif %}
+    {% endif %}
+    <script>
+      var dropdown = document.getElementById("a_condition");
+      dropdown.addEventListener('change', function() {
+        if (dropdown.value == 'later' || dropdown.value == 'before') {
+          $('#data_format').collapse('show');
+        }else{
+          $('#data_format').collapse('hide');
+        }
+      });
+  </script>
+  
   </body>
 </html>

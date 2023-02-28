@@ -59,6 +59,8 @@
         </thead>
         <tbody>
           {% for key, value in cart.items %}
+          {% load custom_tags %}
+          {% with id=key.id %}
           {% for col in value %}
           <tr>
             {% if forloop.counter == 1 %}
@@ -77,13 +79,14 @@
               </form>
             </td>
               
-            <td >undefined</td>
+            <td >{{ quality|get_item:id|get_item:col}}</td>
             {% if forloop.counter == 1 %}
-              <td rowspan= "{{value|length}}">undefined</td>
+              <td rowspan= "{{value|length}}">{{quality_sum|get_item:id}}</td>
               <td rowspan= "{{value|length}}">{{key.price}}</td>
             {% endif %}
           </tr>
           {% endfor %}
+          {% endwith  %}
           {% endfor %}
         </tbody>
         <!--<tfoot>
