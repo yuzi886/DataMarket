@@ -72,7 +72,7 @@
 	    <a>&nbsp</a>
 	    {% csrf_token %}
 				<select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="domain" onchange="this.form.submit();">
-					<option disabled selected value style="display: none;">Select domain...</option>
+					<option disabled selected value style="display: none;">{{chosen_domain}}</option>
 					{% for d in domains %}
 					<option value ={{d}}>{{ d }}</option>
 					{% endfor %}

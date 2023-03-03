@@ -13,7 +13,7 @@ ps = PorterStemmer()
 def extact(sentence):
   #lower case of whole sentence
   sentence = sentence.casefold()
-  word_list = sentence.split()
+  word_list = re.split('[\W_]+', sentence)
   regex = re.compile('[^a-zA-Z]')
   i = 0
   for item in word_list:

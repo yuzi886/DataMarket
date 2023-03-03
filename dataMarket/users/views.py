@@ -46,8 +46,13 @@ def isDate(n):
 	else:
 		return False
 
-def search(kw):
-	global data
+def get_cache(ip,name):
+	if cache.get(str(ip)+"_"+name) == None:
+		return None
+	else :
+		return cache.get(str(ip)+"_"+name)
+
+def search(kw,data):
 	keyword_set = {}
 	for d in data:
 		sentence = ''
@@ -66,47 +71,55 @@ def search(kw):
 				keyword_set[k] = {d.id:1}
 
 
-		# processed input query and displays candidate datasets
-		IDS = {}
-		#  keyword_set = keyword__domain[domain]
-		search_word_set = kg.extact(kw)
-		for w in search_word_set:
-			if w in keyword_set:
-				for item in keyword_set[w].items():
-					if item[0] in IDS:
-						IDS[item[0]]+= item[1]
-					else:
-						IDS[item[0]] = item[1]
-			else:
-				syn_list = kg.synonyms(w)
-				for syn in syn_list:
-					if syn in keyword_set:
-						for item in keyword_set[syn].items():
-							if item[0] in IDS:
-								IDS[item[0]]+= item[1]
-							else:
-								IDS[item[0]] = item[1]
-			
-		#sort the dataset by the mathching level
-		IDS = dict(sorted(IDS.items(), key=lambda x:x[1], reverse=True))
-		data = Dataset.objects.filter(id__in=list(IDS.keys()))
+	# processed input query and displays candidate datasets
+	IDS = {}
+	#  keyword_set = keyword__domain[domain]
+	search_word_set = kg.extact(kw)
+	for w in search_word_set:
+		if w in keyword_set:
+			for item in keyword_set[w].items():
+				if item[0] in IDS:
+					IDS[item[0]]+= item[1]
+				else:
+					IDS[item[0]] = item[1]
+		else:
+			syn_list = kg.synonyms(w)
+			for syn in syn_list:
+				if syn in keyword_set:
+					for item in keyword_set[syn].items():
+						if item[0] in IDS:
+							IDS[item[0]]+= item[1]
+						else:
+							IDS[item[0]] = item[1]
+		
+	#sort the dataset by the mathching level
+	IDS = dict(sorted(IDS.items(), key=lambda x:x[1], reverse=True))
+	data = Dataset.objects.filter(id__in=list(IDS.keys()))
+	return data
 
 
 def index(request):
-	global data,domain,keyword__domain
+	#global data,domain,keyword__domain
 	context ={}
+	ip = get_ip(request)
+	data = cache.get(str(ip)+"_data")
+	domain = cache.get(str(ip)+"_domain")
+	domain_data = cache.get(str(ip)+"_domain_data")
 	if request.method == 'POST':
-		domain = request.POST.get('domain','')
+		domain_sel = request.POST.get('domain','')
 		sort = request.POST.get('sort','')
 		search1 = request.POST.get('search1','')
 		search2 = request.POST.get('search2','')
-		"""f_s = request.POST.get('f_s','')
-								n_r = request.POST.get('n_r','')
-								n_c = request.POST.get('n_c','')"""
-		if domain != '':#for get all domain name 
-			domain_id = Domain.objects.filter(name=domain).values()
+
+		if domain_sel != '':#for get all domain name 
+			domain_id = Domain.objects.filter(name=domain_sel).values()
 			data = Dataset.objects.filter(domain_id = domain_id[0]['id'])
-			context["metadata"]=data
+			domain_data = data
+			domain = domain_sel
+			cache.set(str(ip)+"_data", data)
+			cache.set(str(ip)+"_domain_data",data)
+			cache.set(str(ip)+"_domain", domain)
+
 		elif sort != '' and data != None:# sort the data 
 			if sort == 'price_l_h' :
 				data = sorted(data, key=operator.attrgetter('price'))
@@ -115,12 +128,12 @@ def index(request):
 			else:
 				data = sorted(data, key=operator.attrgetter('pub_by'))
 				#do not do sort by username(because l do not add user name)
-			context["metadata"]=data
+			cache.set(str(ip)+"_data", data)
 		elif search1 != ''and data != None:
 			#seach algorithms 
 			#if domain not in keyword__domain: 
 			keyword_set = {}
-			for d in data:
+			for d in domain_data:
 				sentence = ''
 				#do not add seller name in sentence, because not store user name
 				sentence = sentence + d.title+" "+d.description+" "+ d.pub_by+" "
@@ -166,12 +179,12 @@ def index(request):
 			IDS = dict(sorted(IDS.items(), key=lambda x:x[1], reverse=True))
 			data = Dataset.objects.filter(id__in=list(IDS.keys()))
 			if search2 != '' :
-				search(search2)
-			context["metadata"]=data
+				data = search(search2,data)
+			cache.set(str(ip)+"_data", data)
 
 		elif search2 != '' and search1 == ''and data != None:
-			search(search2)
-			context["metadata"]=data
+			data =search(search2,domain_data)
+			cache.set(str(ip)+"_data", data)
 
 		#print(type(data))
 		"""if data != None:
@@ -191,9 +204,22 @@ def index(request):
 	for name in names:
 		domains.append(name[0])
 	template = loader.get_template('first.html')
+
+	"""
+	# add the drop down values
+	"""
 	context["domains"]=domains
+
+	if domain == None or domain == '':
+		context["chosen_domain"] ="Select domain..."
+	else:
+		context["chosen_domain"] = domain
+
+
+	if data != None:
+		context["metadata"]=data
+
 	template = loader.get_template('first.html')
-	#cache.set('guest', '1',3600)
 	return HttpResponse(template.render(context, request))
 
 
@@ -525,11 +551,11 @@ def data_quality(request):
 	"""
 	ip_quality = ip+"_quality"
 	quality_list = cache.get(ip_quality)
+	if quality_list == None:
+		quality_list = {}
 	context["quality"] =quality_list
 	print(context["quality"])
 	quality_sum={}
-	if quality_list == None:
-		quality_list = {}
 	for ID,col_quality in quality_list.items():
 		quality_sum[ID] = 0
 		for col, c_quality in col_quality.items():

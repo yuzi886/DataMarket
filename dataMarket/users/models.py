@@ -118,16 +118,22 @@ class Dataset(models.Model):
 		blank=True,
 		default=0,
 	)
-	"""completeness = models.DecimalField(
-					max_digits=3, 
-					decimal_places=3,
-					blank=True,
-					default=0.0,
-				)"""
-	timeliness = models.CharField(
-		max_length=200,
-		blank=False,
+
+	Uniqueness = models.IntegerField(
+		blank=True,
+		default=100,
 	)
+
+	data_format = models.CharField(
+		max_length=200,
+		blank=True,
+		default='%Y-%m-%d %H:%M:%S',
+	)
+
+	oldest_date = models.DateTimeField('oldest date')
+
+	recent_date = models.DateTimeField('recent date')
+
 	sample = models.JSONField(
 		blank=True,
 	)
