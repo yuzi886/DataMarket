@@ -50,45 +50,41 @@
       <table class="table table-bordered">
         <thead>
           <tr>
-            <th>Product</th>
+            <th>Dataset</th>
+            <th>Selected Column</th>
             <th>Price</th>
-            <th>Quantity</th>
+            <th>Number of Row</th>
             <th>Total</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
+          {% for key, value in cart.items %}
           <tr>
-            <td>Product 1</td>
-            <td>$20</td>
+            <td>{{key.title}}</td>
+            <td>{{value}}
+            <td>{{key.price}}</td>
             <td>
               <input type="number" class="form-control" value="1" />
             </td>
-            <td>$20</td>
+            <td>{{key.price}}</td>
             <td>
               <button class="btn btn-danger">Remove</button>
             </td>
           </tr>
           <tr>
-            <td>Product 2</td>
-            <td>$30</td>
-            <td>
-              <input type="number" class="form-control" value="1" />
-            </td>
-            <td>$30</td>
-            <td>
-              <button class="btn btn-danger">Remove</button>
-            </td>
-          </tr>
+          {% endfor %}
         </tbody>
         <tfoot>
+          {% if cart|length != 0 %}
           <tr>
-            <td colspan="3"></td>
+            <td colspan="4"></td>
             <td>
               <strong>Total:</strong> $50
             </td>
             <td></td>
           </tr>
+          {% endif%}
         </tfoot>
       </table>
       <div class="text-center">

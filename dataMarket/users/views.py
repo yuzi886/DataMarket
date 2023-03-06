@@ -16,6 +16,7 @@ from django.utils import timezone
 import pytz
 import re
 import random
+import pandas as pd
 
 data = None
 #keyword_set = {}
@@ -51,6 +52,71 @@ def get_cache(ip,name):
 		return None
 	else :
 		return cache.get(str(ip)+"_"+name)
+
+"""
+# sentence is the string that need to turn to regular expression
+# return: regular expression according to the sentence 
+
+"""
+
+def turn_reg(sentence):
+	split_list = list(sentence)
+	last_type = ""
+	regex_pattern = r''
+	for i in range(len(split_list)):
+		if split_list[i].isdigit():
+			if last_type != "digit":
+				regex_pattern += r'\d*'
+
+			last_type = "digit"
+		elif split_list[i].isalpha() and split_list[i].islower():
+
+			if last_type != "lower":
+				regex_pattern += r'[a-z]*'
+			last_type = "lower"
+
+		elif split_list[i].isalpha() and split_list[i].isupper():
+
+			if last_type != "upper":
+				regex_pattern += r'[A-Z]*'
+			last_type = "upper"
+		else:
+			regex_pattern += re.escape(split_list[i])
+
+			last_type = "special"
+
+
+	return regex_pattern
+
+"""
+# check how much cell in the column has the same format
+# data : queryset of dataset model  
+# col: the column name of dataset
+# return: the number of cell which has the same format
+
+max number of cell which has the same format / total number of cell in the column
+"""
+def consistent_num(data,col):
+	"""
+	col_detail contain [mean(index=0),min(index=1),max(index=2),distict(index=3), 
+						std(index=4),type(index=5),missing_num(index=6)]
+	"""
+	col_detail = (data.column_summary)[col] 
+	if col_detail[5] == "str":
+		df = pd.read_csv(data.host_link,encoding = 'ISO-8859-1')
+		column = df[col].tolist()
+		match_dict = {}
+		for cell in column:
+			regex_pattern = turn_reg(cell)
+			if regex_pattern in match_dict:
+				match_dict[regex_pattern] +=1
+			else:
+				match_dict[regex_pattern] = 1
+		return (max(match_dict.items(), key=lambda x:x[1]))[1]
+	else:
+		return data.total_records
+
+
 
 def search(kw,data):
 	keyword_set = {}
@@ -286,251 +352,89 @@ def add_cart(request,ID):
 	return redirect("http://127.0.0.1:8000/users")
 
 def shop_cart(request):
-	global cart_list
-	context ={}
-	data_list =[]
+	ip = get_ip(request)
+	cart_list = cache.get(ip)
+	if cart_list == None:
+		cart_list = {}
+	cart_shop = {}
+	print("in")
+	if request.method == 'POST':
+		for key,value in cart_list.items():
+			col_chosen = request.POST.getlist('checkbox_'+key,'')
+			if col_chosen != None:
+				data = Dataset.objects.get(id = key)
+				cart_shop[data] = ', '.join(col_chosen)
+
+	context = {}
+	print("in")
+	context["cart"] = cart_shop
+	print(context["cart"])
 	template = loader.get_template('shop_cart.html')
+
 	return HttpResponse(template.render(context,request))
 
-def formula(request,ID,col):
+
+# ---------------------------------------------
+# ------------------ Data Quality Formua ------------------
+# ---------------------------------------------
+def formula(request):
 	context ={}
 	context["choices"]= [0,10,20,30,40,50,60,70,80,90,100]
-	context["col"] = col
+	#context["col"] = col
 	#get random example of the column
-	data = Dataset.objects.get(id = ID)
+	"""data = Dataset.objects.get(id = ID)
 	sample = data.sample
 	sample_list = list(data.sample)
 	row = (data.sample)[sample_list[random.randint(0,len(sample_list)-1)]]
 	context["sample"] = row[col]
 	template = loader.get_template('formula.html')
-	context["data"] = data.title
+	context["data"] = data.title"""
+	if request.method == 'POST':
+		complet_rate = request.POST.get('c_c','')
+		complet_rate = float(complet_rate) if len(complet_rate) != 0 else 0
+
+		complet_weight =  request.POST.get('c_c_w','')
+		complet_weight = int(complet_weight) if len(complet_weight) != 0 else 0
+
+		uniqueness_rate = request.POST.get('u','')
+		uniqueness_rate = float(uniqueness_rate) if len(uniqueness_rate) != 0 else 0
+
+		uniqueness_weight = request.POST.get('u_w','')
+		uniqueness_weight = int(uniqueness_weight) if len(uniqueness_weight) != 0 else 0
+
+		consistency_rate = request.POST.get('c_con','')
+		consistency_rate = float(consistency_rate) if len(consistency_rate) != 0 else 0
+
+		consistency_weight = request.POST.get('c_con_w','')
+		consistency_weight = int(consistency_weight) if len(consistency_weight) != 0 else 0
+
+		if complet_weight+uniqueness_weight+consistency_weight != 100 :
+			messages.warning(request, "The sum of weight must be equal to 100. Please write again ")
+			return redirect(request.META.get('HTTP_REFERER', '..'))
+
+		"""
+		# store the formula parameter to the cache
+		# eg. ip_quality:{"Completeness":[complet_rate,complet_weight]}
+		"""
+		ip = get_ip(request)
+		ip_quality = ip+"_quality"
+		quality_list = cache.get(ip_quality)
+		if quality_list is None:
+			quality_list = {}
+		quality_list["Completeness"] = [complet_rate,complet_weight]
+		quality_list["Uniqueness"] = [uniqueness_rate,uniqueness_weight]
+		quality_list["Consistency"] = [consistency_rate,consistency_weight]
+		cache.set(ip_quality,quality_list ,3600)
+		print(quality_list)
+		return redirect(data_quality)
+
+
+	template = loader.get_template('formula.html')
 	return HttpResponse(template.render(context,request))
 
-def formula_add(request,ID,col):
-	complet_rate = request.POST.get('c_c','')
-	complet_rate = float(complet_rate) if len(complet_rate) != 0 else 0
-
-	complet_weight =  request.POST.get('c_c_w','')
-	complet_weight = int(complet_weight) if len(complet_weight) != 0 else 0
-
-	"""expire_time = request.POST.get('e_t','')
-				if len(expire_time) == 0 :
-					messages.warning(request, "the expire_time should not be empty")
-					return redirect(request.META.get('HTTP_REFERER', '..'))
-				e_t = datetime.strptime(expire_time, '%Y-%m-%d')
-				t_zone = pytz.utc
-				expire_time = t_zone.localize(e_t)"""
-
-	volatility_y = request.POST.get('v_y','')
-	volatility_y = int(volatility_y) if len(volatility_y) != 0 else 0
-	volatility_m = request.POST.get('v_m','')
-	volatility_m = int(volatility_m) if len(volatility_m) != 0 else 0
-	volatility_d = request.POST.get('v_d','')
-	volatility_d = int(volatility_d) if len(volatility_d) != 0 else 0
-	volatility_h = request.POST.get('v_','')
-	volatility_h = int(volatility_h) if len(volatility_h) != 0 else 0
-	expiry_time = timedelta(days=volatility_d+ 30*volatility_m+ 365*volatility_y+ volatility_h/24)
-	sample_format = request.POST.get('c_d_f','')
-
-	fresh_rate = request.POST.get('f_p','')
-	fresh_rate = float(fresh_rate) if len(fresh_rate) != 0 else 0
-
-	fresh_weight = request.POST.get('f_w','')
-	fresh_weight = int(fresh_weight) if len(fresh_weight) != 0 else 0
-
-	accuracy_condition = request.POST.get('a_condition','')
-	accuracy_input = request.POST.get('a_text','')
-	accuracy_rate =request.POST.get('a_p','')
-	accuracy_rate = float(accuracy_rate) if len(accuracy_rate) != 0 else 0
-
-	accuracy_weight =request.POST.get('a_w','')
-	accuracy_weight = int(accuracy_weight) if len(accuracy_weight) != 0 else 0
-
-	unique_condition = request.POST.get('u_condition','')
-
-	unique_input = request.POST.get('u_text','')
-	unique_input = int(unique_input) if len(unique_input) != 0 else 0
-
-
-	unique_weight= request.POST.get('u_w','')
-	unique_weight = int(unique_weight) if len(unique_weight) != 0 else 0
-
-	data = Dataset.objects.get(id = ID)
-	"""
-	col_detail contain [mean(index=0),min(index=1),max(index=2),distict(index=3), 
-						std(index=4),type(index=5),missing_num(index=6)]
-	"""
-	col_detail = (data.column_summary)[col] 
-
-	if complet_weight+fresh_weight+accuracy_weight+unique_weight != 100 :
-		messages.warning(request, "The sum of weight must be equal to 100. Please write again ")
-		return redirect(request.META.get('HTTP_REFERER', '..'))
-	
-	"""
-	This formula is for the completness point of the column
-	"""
-
-	completness = ((data.total_records -col_detail[6])/data.total_records)*100
-	if completness >= complet_rate and complet_weight != 0:
-		complet_point = 1
-	else:
-		complet_point = 0
-
-	"""
-	This formula is for the freshness point of the column
-	"""
-	#print((data.updated_at).tzinfo) 
-	Age = (timezone.now() - data.pub_date )
-	Currency = timezone.now() - data.updated_at
-	Volatility = timezone.now() - data.updated_at + expiry_time
-	Timeliness = max(1- Currency/Volatility,0)*100
-	print("Timeliness:"+str(Timeliness))
-	if Timeliness >fresh_rate and fresh_weight != 0:
-		time_point =1
-	else:
-		time_point =0
-
-
-	"""
-	This formula is for the accuracy point of the column
-	"""
-
-
-	num_fit = 0
-	accuracy_point = 0
-	if accuracy_condition == 'contain':
-		with open(data.host_link, 'r') as csvfile:
-			csvreader = csv.reader(csvfile)
-			column_names = next(csvreader)
-			index = column_names.index(col)
-			for row in csvreader:
-				if accuracy_input in row[index]:
-					num_fit+=1
-	elif accuracy_condition == 'n_contain':
-		with open(data.host_link, 'r') as csvfile:
-			csvreader = csv.reader(csvfile)
-			column_names = next(csvreader)
-			index = column_names.index(col)
-			for row in csvreader:
-				if accuracy_input not in row[index]:
-					num_fit+=1
-	elif accuracy_condition == 'less':
-		if isNumeric(accuracy_input):
-			float(accuracy_input)
-			with open(data.host_link, 'r') as csvfile:
-				csvreader = csv.reader(csvfile)
-				column_names = next(csvreader)
-				index = column_names.index(col)
-				for row in csvreader:
-					if isNumeric(row[index]) and row[index] < accuracy_input:
-						num_fit+=1
-		else:
-			messages.warning(request, "when condition is less, the input must be number. Please write again ")
-			redirect(request.META.get('HTTP_REFERER', '..'))
-
-	elif accuracy_condition == 'higher':
-		if isNumeric(accuracy_input):
-			float(accuracy_input)
-			with open(data.host_link, 'r') as csvfile:
-			# Create a reader object
-				csvreader = csv.reader(csvfile)
-			# Get the column names
-				column_names = next(csvreader)
-				index = column_names.index(col)
-			# Read each row in the file
-				for row in csvreader:
-			# Print the first column of each row
-					if isNumeric(row[index]) and float(row[index]) > accuracy_input:
-						num_fit+=1
-		else:
-			messages.warning(request, "when condition is higher, the input must be number. Please write again ")
-			redirect(request.META.get('HTTP_REFERER', '..'))
-	else:
-		accuracy_point = 1
-	"""elif accuracy_condition == 'later':
-					if isDate(accuracy_input):
-						accuracy_input = datetime.strptime(accuracy_input, '%Y/%m/%d')
-						with open(data.host_link, 'r') as csvfile:
-						# Create a reader object
-							csvreader = csv.reader(csvfile)
-						# Get the column names
-							column_names = next(csvreader)
-							index = column_names.index(col)
-							for row in csvreader:
-								if row[index] > accuracy_input :
-									num_fit+=1
-					else:
-						messages.warning(request, "when condition is later, the input must fit data format. Detail show in \
-						 input format button. Please write again ")
-						redirect(request.META.get('HTTP_REFERER', '..'))
-				elif accuracy_condition == 'before':
-					if isDate(accuracy_input):
-						accuracy_input = datetime.strptime(accuracy_input, '%Y/%m/%d')
-						with open(data.host_link, 'r') as csvfile:
-						# Create a reader object
-							csvreader = csv.reader(csvfile)
-						# Get the column names
-							column_names = next(csvreader)
-							index = column_names.index(col)
-							for row in csvreader:
-								if row[index] < accuracy_input :
-									num_fit+=1
-					else:
-						messages.warning(request, "when condition is later, the input must fit data format. Detail show in \
-						 input format button. Please write again ")
-						redirect(request.META.get('HTTP_REFERER', '..'))"""
-	
-	if (num_fit/ data.total_records)> accuracy_rate and accuracy_weight != 0:
-		accuracy_point = 1
-
-	"""
-	This formula is for the Uniqueness point of the column
-	"""
-	if unique_weight != 0:
-		if unique_condition == 'bigger':
-			if unique_input >col_detail[3]: 
-				unique_point = 1
-			else:
-				unique_point = 0
-		elif unique_condition == 'smaller':
-			if unique_input <col_detail[3]: 
-				unique_point = 1
-			else:
-				unique_point = 0
-		else:
-			if unique_input == col_detail[3]: 
-				unique_point = 1
-			else:
-				unique_point = 0
-	else:
-		unique_point = 0
-	print("Uniqueness:"+str(unique_point))
-	
-	"""
-	# when the character is satisfied, final quality += (weight of character/100)
-	"""
-	quality = (unique_point*(unique_weight/100) + accuracy_point*(accuracy_weight/100)+fresh_weight*(time_point/100)+\
-	complet_point*(complet_weight/100))*100
-	print("quality: "+str(quality))
-	"""
-	# store the data quality to the quality_list(stored in cache)
-	# quality_list = {ID:{col:quality}}
-	"""
-	ip = get_ip(request)
-	ip_quality = ip+"_quality"
-	quality_list = cache.get(ip_quality)
-	if quality_list is None:
-		quality_list = {}
-	ID = int(ID)
-	if ID in quality_list:
-		quality_list[(ID)][col] = quality
-	else:
-		quality_list[ID] = {col:quality}
-	cache.set(ip_quality,quality_list ,3600)
-	print(quality_list)
-	return redirect("../../../")
 
 def data_quality(request):
+	#print("in")
 	context={}
 	ip = get_ip(request)
 	cart_list = cache.get(ip)
@@ -538,31 +442,86 @@ def data_quality(request):
 		cart_list = {}
 	cart={}
 
+
 	"""
 	# data is the dataset model object and value is the column that customer choosen
 	"""
+
 	for key,value in cart_list.items():
 		data = Dataset.objects.get(id = key)
 		cart[data] = value
 	context["cart"] =cart
 
 	"""
-	# From cache, to get data quality
+	# From cache, to get data quality 
 	"""
 	ip_quality = ip+"_quality"
 	quality_list = cache.get(ip_quality)
 	if quality_list == None:
-		quality_list = {}
-	context["quality"] =quality_list
-	print(context["quality"])
+		return redirect("formula")
+
+
+	"""
+	# calculate quality of every column 
+	"""
+	"""quality_list["Completeness"] = [complet_rate,complet_weight]
+				quality_list["Uniqueness"] = [uniqueness_rate,uniqueness_weight]
+				quality_list["Consistency"] = [consistency_rate,consistency_weight]"""
+	quality_dic = {}
+	for key,value in cart_list.items():
+		data = Dataset.objects.get(id = key)
+		summary = data.column_summary
+		quality_dic[int(key)] = {}
+
+		for col in value:
+			"""
+			# calculate the completness
+			"""
+			completness = ((data.total_records -summary[col][6])/data.total_records)*100
+			#print("completness:"+str(completness))
+
+			if completness >= quality_list["Completeness"][0]:
+				complet_point = 1
+			else:
+				complet_point = 0
+			"""
+			# calculate the Uniqueness
+			"""
+			uniqueness = (data.unique_num/data.total_records)*100
+			#print("uniqueness:"+str(uniqueness))
+
+			if uniqueness >= quality_list["Uniqueness"][0]:
+				unique_point = 1
+			else:
+				unique_point = 0
+			"""
+			# calculate the Consistency
+			# max number of cell which has the same format / total number of cell in the column
+			"""
+
+			consistency = (consistent_num(data,col)/data.total_records)*100
+			#print("consistency:"+str(consistency))
+			if consistency >= quality_list["Consistency"][0]:
+				consist_point = 1
+			else:
+				consist_point = 0
+
+			quality_dic[int(key)][col]= complet_point*quality_list["Completeness"][1]+ \
+			unique_point*quality_list["Uniqueness"][1]+consist_point* quality_list["Consistency"][1]
+			#print(quality_dic[int(key)][col])
+
+	context["quality"] =quality_dic #{ID:{col:data_quality}}
+	
 	quality_sum={}
-	for ID,col_quality in quality_list.items():
+	for ID,col_quality in quality_dic.items():
 		quality_sum[ID] = 0
 		for col, c_quality in col_quality.items():
-			quality_sum[ID]+=c_quality*(1/len(col_quality))
+			quality_sum[ID]+= c_quality*(1/len(col_quality))
+		quality_sum[ID] = round(quality_sum[ID])
 
 	context["quality_sum"] = quality_sum
 	template = loader.get_template('data_quality.html')
 	return HttpResponse(template.render(context,request))
+
 
 

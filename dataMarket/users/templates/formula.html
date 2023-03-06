@@ -27,39 +27,13 @@
     <div class="container my-5">
       <h1 class="text-center">Data Quality Formula</h1>
       <p class="text-center"> <mark class="warning">The sum of specified weight should be 100. Please specify the right weight number! </mark></p>
-      <p >Dataset Name: <strong>{{data}}</strong></p>
-      <p >Column Name: <strong>{{col}}</strong> </p>
-      <p >Column Sample: <mark class="text-success font-weight-bold">{{sample}}</mark> </p>
-      <form action="./add/" method="post">
+      <form action="." method="post">
       {% csrf_token %}
 
       <table class="table table-bordered">
         <tbody>
-          <!--<tr>
-            <td>Total Completeness:<br/><mark class="blue">Please  specify the % of  empty/null <br/>values  in  the entire  dataset. </mark></td>
-            <td colspan="3" class="table-active">
-              <div class="d-flex">
-                <div class="p-2 ">
-                  <a> Total completeness  % ></a></div>
-                <div class="p-2">
-                  <input type="number" class="form-control" name="t_c" id="t_c" />
-                </div>
-              </div>
-            </td>
-
-            <td>
-             <div class="weight">
-                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="t_c_w">
-                <option disabled selected value style="display: none;">Weight</option>
-                {% for c in choices %}
-                <option value ={{c}}>{{ c }}</option>
-                {% endfor %}
-                </select>
-              </div>
-            </td>
-          </tr>-->
           <tr>
-            <td>Column Completeness:<mark class="blue"><br>Please  specify the %  of  empty/null  values  in  specific  column.</mark></td>
+            <td>Column Completeness:<mark class="blue"><br>Please  specify the %  of  empty/null  cell  in  specific  column.</mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <!--<div class="p-2 ">
@@ -69,10 +43,13 @@
                 </select>
                 </div>-->
                 <div class="p-2 ">
-                  <a> Column completeness  % ></a>
+                  <a> Completeness% ></a>
                 </div>
                 <div class="p-2">
-                  <input type="number" class="form-control" name="c_c" id="c_c" min="0" max = "100"/>
+                  <input type="number" class="form-control" name="c_c" id="c_c" min="0" max = "100" placeholder="100" />
+                </div>
+                <div class="p-2">
+                  <a>%</a>
                 </div>
               </div>
             </td>
@@ -89,41 +66,22 @@
             </td>
           </tr>
           <tr>
-            <td>Timeliness:<br/><mark class="blue">Please  specify the typical time period the column maintain validity <br/>  </mark></td>
+            <td>Uniqueness:<br/><mark class="blue">Please specify the %  of non-duplicate or non-overlapping row. <br/>  </mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <div class="p-2 ">
-                  <a> Volatility: </a>
-                </div>
-                <div class="p-2  col-2 ">
-                  <input class="form-control" type="number" id="v_y" name = "v_y" min="0" >
-                  <a >Year</a>
-                </div>
-                <div class="p-2 col-2">
-                  <input class="form-control" type="number" id="v_m" name = "v_m" min="0" max = "12">
-                   <a >Month</a>
-                </div>
-                <div class="p-2 col-2">
-                  <input class="form-control" type="number" id="v_d" name = "v_d" min="0" max = "365">
-                   <a >Day</a>
-                </div>
-                <div class="p-2 col-2">
-                  <input class="form-control" type="number" id="v_h" name = "v_h" min="0" max = "24">
-                   <a >Hour</a>
-                </div>
-              </div>
-              <div class="d-flex">
-                <div class="p-2 ">
-                  <a> Timeliness  % > </a>
+                  <a> Uniqueness % ></a>
                 </div>
                 <div class="p-2">
-                  <input type="number" id="f_p" name = "f_p" min="0" max = "100">
+                  <input type="number" class="form-control" name="u" id="u" min="0" max = "100" placeholder="100" />
                 </div>
-              </div>
+                <div class="p-2">
+                  <a>%</a>
+                </div>
             </td>
             <td>
               <div class="weight">
-                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="f_w">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_w">
                 <option disabled selected value style="display: none;">Weight</option>
                 {% for c in choices %}
                 <option value ={{c}}>{{ c }}</option>
@@ -133,129 +91,22 @@
             </td>
           </tr>
           <tr>
-            <td>Accuracy:<br/><mark class="blue">Please  specify the accuracy  condition of  <br/>this column for which the values  will  be  considered as  accurate  or  not accurate. </mark></td>
+            <td>Column Consistency:<br/><mark class="blue">Please  specify the %  of consistent cell in formatting and structure within the column.</mark></td>
             <td colspan="3" class="table-active">
               <div class="d-flex">
-                 <!--<div class="p-2 ">
-                 <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_column_name">
-                <option disabled selected value style="display: none;">Select column..</option>
-                  <option value ="undefine">undefined</option>
-                </select>
-                </div>-->
                 <div class="p-2 ">
-                  <p>{{column}}</p>
-                </div>
-                <div class="p-2 ">
-                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_condition" id="a_condition">
-                    <option disabled selected value style="display: none;">Select condition..</option>
-                    <option value ="contain">Contain</option>
-                    <option value ="n_contain">not Contain</option>
-                    <!--<option value ="exact">is Exactly</option>-->
-                    <option value ="less">Less Than</option>
-                    <option value ="higher">Higher Than</option>
-                    <!--<option value ="later">Later Than</option>
-                    <option value ="before">Before</option>-->
-                  </select>
+                  <a> Consistency % ></a>
                 </div>
                 <div class="p-2">
-                  <input type="text" id="a_text" name = "a_text">
-                </div>
-                <div class="p-1">
-                  <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#exampleModalLong">Input Format</button>
-                  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h4 class="modal-title font-weight-bold" id="exampleModalLongTitle">Input Format</h4>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                          <p class="small"><strong><kbd>less than</kbd> and <kbd>higher than</kbd> button</strong></p> 
-                          <p class="small">---&nbsp;the input box should be inputed a <code>number</code></p>
-                          <br/>
-                          <br/>
-                          <p class="small"><strong><kbd>contain</kbd> and <kbd>no contain</kbd> button </strong></p> 
-                          <p class="small">---&nbsp;the input box could be inputted any word. </p>
-                          <!--<p class="small" style="border: 1px solid black; padding: 5px;">if you want to input multiple word, you could use <code>,,</code> to distingusih each other.</p>-->
-                         <!-- <p class="small" >---&nbsp;if you want to input <mark class="bg-warning">multiple word</mark>, you could use <code>,,</code> to distingusih each other.</p>
-                          <p class="small" >---&nbsp;if you want to input a <mark class="bg-warning">type of data</mark>, you can input <code>NUM</code>&nbsp;(any number) or <code>CHAR</code>&nbsp;(any char). </p>
-                          <p class="small" style="border: 1px solid green; padding: 5px;" >eg.<mark class="text-success font-weight-bold"> NUM &nbsp,,&nbsp&nbsp/&nbsp&nbsp,,&nbspCHAR </mark>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;the column value should contain at least one number, at least one char and "/" symbol </p>-->
-                          <br/>
-                         <!-- <br/>
-                          <p class="small"><strong><kbd>is exactly</kbd>  button</strong></p> 
-                          <p class="small">---&nbsp;the input box could be inputted <code>any word</code>.</p>
-                          <br/>-->
-                          <br/>
-                          <p class="small"><strong><kbd>later than</kbd> and <kbd>before</kbd> button </strong></p> 
-                          <p class="small">---&nbsp;the input box should satisfy the date format <code>(data  YY/MM/DD)</code> </p>
-                          <p class="small" style="border: 1px solid green; padding: 5px;">eg.<mark class="text-success font-weight-bold"> 2020 / 06 / 10 </mark></p>
-                          <p class="small">---&nbsp;the input box beside <kbd>Column data format</kbd> should type in the date format of sample by <code>Y</code> (year),<code>M</code> (Month),<code>D</code>(day),<code>H</code>c(Hour),<code>M</code>(Minute),<code>S</code>(Second) </p>
-                          <p class="small" style="border: 1px solid green; padding: 5px;">eg. Date sample: "2022-02-25 12:00:00" <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Standard input:<mark class="text-success font-weight-bold">YYYY-MM-DD HH:MM:SS</mark></p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="collapse row" id="data_format">
-                <div class="col-4">
-                  <a>&nbsp;&nbsp; Sample date format: </a>
-                </div>
-                <div class="col-2">
-                  <input type="text" name = "c_d_f" placeholder="eg.YYYY-MM-DD">
-                </div>
-              </div>
-              <div class="d-flex">
-                <div class="p-2 ">
-                  <a> Accuracy  % > </a>
+                  <input type="number" class="form-control" name="c_con" id="c_con" min="0" max = "100" placeholder="100" />
                 </div>
                 <div class="p-2">
-                  <input type="number" id="a_p" name = "a_p" min="0" max = "100">
+                  <a>%</a>
                 </div>
-              </div>
             </td>
             <td>
               <div class="weight">
-                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="a_w">
-                <option disabled selected value style="display: none;">Weight</option>
-                {% for c in choices %}
-                <option value ={{c}}>{{ c }}</option>
-                {% endfor %}
-                </select>
-              </div>
-            </td>
-          </tr>
-           <tr>
-            <td>Uniqueness:<br/><mark class="blue">Please  specify how many  unique  values  is acceptable for you.</mark></td>
-             <td colspan="3" class="table-active">
-              <div class="d-flex">
-                <!--<div class="p-2 ">
-                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_column_name">
-                <option disabled selected value style="display: none;">Select column..</option>
-                  <option value ="undefine">undefined</option>
-                </select>
-                </div>-->
-                <div class="p-2 ">
-                  <p>{{column}}</p>
-                </div>
-                <div class="p-2 ">
-                  <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_condition">
-                  <option disabled selected value style="display: none;">Select condition..</option>
-                  <option value ="bigger">more than</option>
-                  <option value ="smaller">less than</option>
-                  <option value ="equal">equal</option>
-                </select>
-                </div>
-                <div class="p-2">
-                  <input type="number" id="u_text" name = "u_text">
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="weight">
-                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="u_w">
+                <select class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" name="c_con_w">
                 <option disabled selected value style="display: none;">Weight</option>
                 {% for c in choices %}
                 <option value ={{c}}>{{ c }}</option>
@@ -283,7 +134,7 @@
       {% endfor %}
     </script>
     {% endif %}
-    <script>
+    <!--<script>
       var dropdown = document.getElementById("a_condition");
       dropdown.addEventListener('change', function() {
         if (dropdown.value == 'later' || dropdown.value == 'before') {
@@ -292,7 +143,7 @@
           $('#data_format').collapse('hide');
         }
       });
-  </script>
+  </script>-->
   
   </body>
 </html>

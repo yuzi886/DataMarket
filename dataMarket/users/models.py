@@ -119,7 +119,7 @@ class Dataset(models.Model):
 		default=0,
 	)
 
-	Uniqueness = models.IntegerField(
+	unique_num = models.IntegerField(
 		blank=True,
 		default=100,
 	)
@@ -129,10 +129,6 @@ class Dataset(models.Model):
 		blank=True,
 		default='%Y-%m-%d %H:%M:%S',
 	)
-
-	oldest_date = models.DateTimeField('oldest date')
-
-	recent_date = models.DateTimeField('recent date')
 
 	sample = models.JSONField(
 		blank=True,

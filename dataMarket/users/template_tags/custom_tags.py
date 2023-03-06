@@ -9,8 +9,6 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 @register.filter
-def get_item_2d(dictionary, keys):
-    row_key, col_key = keys.split(",")
-    row = dictionary.get(row_key, {})
-    return row.get(col_key, "")
+def length(dictionary):
+    return len(dictionary)+3
 
