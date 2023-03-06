@@ -356,19 +356,29 @@ def shop_cart(request):
 	cart_list = cache.get(ip)
 	if cart_list == None:
 		cart_list = {}
+
+	cache_cart = cache.get(str(ip)+"_cart")
+	if cache_cart == None:
+		cache_cart = {}
+
 	cart_shop = {}
-	print("in")
 	if request.method == 'POST':
 		for key,value in cart_list.items():
 			col_chosen = request.POST.getlist('checkbox_'+key,'')
 			if col_chosen != None:
-				data = Dataset.objects.get(id = key)
-				cart_shop[data] = ', '.join(col_chosen)
+				if key in cache_cart:
+					cache_cart[key].extend(set(col_chosen)-set(cache_cart[key]))
+				else:
+					cache_cart[key] = col_chosen
+				#cart_shop[data] = ', '.join(cache_cart[key])
 
+	for key,value in cache_cart.items():
+		data = Dataset.objects.get(id = key)
+		cart_shop[data] = ', '.join(cache_cart[key])
+	
 	context = {}
-	print("in")
 	context["cart"] = cart_shop
-	print(context["cart"])
+	cache.set(str(ip)+"_cart",cache_cart)
 	template = loader.get_template('shop_cart.html')
 
 	return HttpResponse(template.render(context,request))
@@ -499,8 +509,8 @@ def data_quality(request):
 			# max number of cell which has the same format / total number of cell in the column
 			"""
 
-			consistency = (consistent_num(data,col)/data.total_records)*100
-			#print("consistency:"+str(consistency))
+			consistency = (summary[col][7]/data.total_records)*100
+			print("consistency:"+str(consistency))
 			if consistency >= quality_list["Consistency"][0]:
 				consist_point = 1
 			else:
