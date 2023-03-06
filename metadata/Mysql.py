@@ -7,7 +7,7 @@ def Select_column(column_name,table_name, condition):
     host="localhost",
     user="root",
     password="Kilburn",
-    database="datamarket"
+    database="data_marketplace"
   )
   mycursor = mydb.cursor()
   mycursor.execute("SELECT %s FROM %s WHERE %s"%(column_name,table_name,condition))
@@ -22,7 +22,7 @@ def Select_One(table_name, condition):
     host="localhost",
     user="root",
     password="Kilburn",
-    database="datamarket"
+    database="data_marketplace"
   )
   mycursor = mydb.cursor()
   mycursor.execute("SELECT * FROM %s WHERE %s"%(table_name,condition))
@@ -39,7 +39,7 @@ def Insert_Row(table_name, column_name,value_list):
     host="localhost",
     user="root",
     password="Kilburn",
-    database="datamarket"
+    database="data_marketplace"
   )
   mycursor = mydb.cursor()
   value = ""
@@ -54,6 +54,7 @@ def Insert_Row(table_name, column_name,value_list):
     query = "INSERT INTO %s(%s) VALUES (%s)"%(table_name,column_name,value)
     print(query)
     mycursor.execute(query)
+    mydb.commit()
   except Exception as e:
     flag = False
     print(e)
