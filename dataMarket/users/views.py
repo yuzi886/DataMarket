@@ -462,6 +462,7 @@ def data_quality(request):
 		cart[data] = value
 	context["cart"] =cart
 
+
 	"""
 	# From cache, to get data quality 
 	"""
@@ -521,7 +522,7 @@ def data_quality(request):
 			#print(quality_dic[int(key)][col])
 
 	context["quality"] =quality_dic #{ID:{col:data_quality}}
-	
+
 	quality_sum={}
 	for ID,col_quality in quality_dic.items():
 		quality_sum[ID] = 0
@@ -530,8 +531,20 @@ def data_quality(request):
 		quality_sum[ID] = round(quality_sum[ID])
 
 	context["quality_sum"] = quality_sum
+
 	template = loader.get_template('data_quality.html')
 	return HttpResponse(template.render(context,request))
 
-
+def column_quality(request,ID,col):
+	data = Dataset.objects.get(id = ID)
+	context ={}
+	context['data'] = data
+	context['column'] = col
+	sample = data.sample
+	sample_list = list(data.sample)
+	row = (data.sample)[sample_list[random.randint(0,len(sample_list)-1)]]
+	context["sample"] = row[col]
+	context["types"] = ["Date","Other"]
+	template = loader.get_template('column_quality.html')
+	return HttpResponse(template.render(context,request))
 

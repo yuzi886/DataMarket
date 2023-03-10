@@ -9,6 +9,6 @@ def get_item(dictionary, key):
     return dictionary.get(key)
 
 @register.filter
-def length(dictionary):
+def len(dictionary):
     return len(dictionary)+3
 
