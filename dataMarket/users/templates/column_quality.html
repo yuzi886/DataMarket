@@ -28,7 +28,7 @@
       <h1 class="text-center">Column Quality Formula</h1>
       <p class="text-center"> <mark class="warning">The sum of specified weight should be 100. Please specify the right weight number! </mark></p>
 
-      <form action="{%url 'data_quality'%}" method="post">
+      <form action="../../../column_add/{{data.id}}/{{column}}/" method="post">
       {% csrf_token %}
 
       <table class="table table-bordered">
@@ -44,13 +44,7 @@
                 </select>
                 </div>-->
                 <div class="p-2 ">
-                  <a> Completeness% ></a>
-                </div>
-                <div class="p-2">
-                  <input type="number" class="form-control" name="c_c" id="c_c" min="0" max = "100" placeholder="100" />
-                </div>
-                <div class="p-2">
-                  <a>%</a>
+                  <a> Completeness% > &nbsp;{{complet}}</a>
                 </div>
               </div>
             </td>
@@ -71,14 +65,9 @@
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <div class="p-2 ">
-                  <a> Uniqueness % ></a>
+                  <a> Uniqueness % > &nbsp;{{uniqueness}}</a>
                 </div>
-                <div class="p-2">
-                  <input type="number" class="form-control" name="u" id="u" min="0" max = "100" placeholder="100" />
-                </div>
-                <div class="p-2">
-                  <a>%</a>
-                </div>
+              </div>
             </td>
             <td>
               <div class="weight">
@@ -96,14 +85,9 @@
             <td colspan="3" class="table-active">
               <div class="d-flex">
                 <div class="p-2 ">
-                  <a> Consistency % ></a>
+                  <a> Consistency % > &nbsp;{{consist}}</a>
                 </div>
-                <div class="p-2">
-                  <input type="number" class="form-control" name="c_con" id="c_con" min="0" max = "100" placeholder="100" />
-                </div>
-                <div class="p-2">
-                  <a>%</a>
-                </div>
+              </div>
             </td>
             <td>
               <div class="weight">
@@ -170,10 +154,17 @@
             </select>
           </td>
           <td>
-            <div id = "Other" style="display: none;" >
-              <a > <mark class="warning">The column type is not in the range of accuarcy caculation</mark></a>
-            </div>
-            <div id = "Date" style="display: none;">
+           <div id = "Other" style="display: none;" >
+              <a > <mark class="warning">The column type isn't in accuarcy caculation range. Please Go Back</mark></a>
+            </div >
+            <!--<div id = "City" style="display: none;" >
+              <div class="d-flex" >
+                <div class="p-2 ">
+                  <a></a>
+                </div>
+              </div>
+            </div>-->
+           <!-- <div id = "Date" style="display: none;">
             <div class="d-flex" >
               <div class="p-2 ">
                 <a>Year:</a>
@@ -211,7 +202,7 @@
                 <option value = "2th">2th </option>
                 <option value = "3th">3th </option>
                 </select>
-              </div>
+              </div>-->
             </div>
           </div>
           </td>
@@ -239,10 +230,16 @@
 
     <script>
       var dropdown = document.getElementById('column_type');
-      var date = document.getElementById('Date');
+      //var date = document.getElementById('Date');
       var other = document.getElementById('Other');
       dropdown.onchange = function() {
-          if (dropdown.value == 'Date') {
+        if (dropdown.value == 'Other') {
+          //date.style.display = 'none';
+          other.style.display = 'block';
+        }else{
+          other.style.display = 'none';
+        }
+          /*if (dropdown.value == 'Date') {
               date.style.display = 'block';
               other.style.display = 'none';
           } else if (dropdown.value == 'Other') {
@@ -251,7 +248,7 @@
           } else {
               date.style.display = 'none';
               other.style.display = 'none';
-          }
+          }*/
       }
     </script>
     

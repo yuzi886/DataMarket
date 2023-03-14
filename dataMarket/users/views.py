@@ -17,6 +17,8 @@ import pytz
 import re
 import random
 import pandas as pd
+from dateutil import parser
+import pycountry
 
 data = None
 #keyword_set = {}
@@ -24,6 +26,13 @@ keyword__domain = {}
 #IDS = {} #store matching level between searching word and all dataset
 domain =""
 cart_list = []
+
+def is_valid_country_name(country_name):
+	try:
+		pycountry.countries.lookup(country_name)
+		return True
+	except LookupError:
+		return False
 
 def get_ip(request):
 	x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')  # 判断是否使用代理
@@ -473,11 +482,11 @@ def data_quality(request):
 
 
 	"""
-	# calculate quality of every column 
+	# From cache, to get column quality formula
 	"""
-	"""quality_list["Completeness"] = [complet_rate,complet_weight]
-				quality_list["Uniqueness"] = [uniqueness_rate,uniqueness_weight]
-				quality_list["Consistency"] = [consistency_rate,consistency_weight]"""
+	column_form = cache.get(ip+"_column_Quality")
+
+
 	quality_dic = {}
 	for key,value in cart_list.items():
 		data = Dataset.objects.get(id = key)
@@ -511,11 +520,28 @@ def data_quality(request):
 			"""
 
 			consistency = (summary[col][7]/data.total_records)*100
-			print("consistency:"+str(consistency))
 			if consistency >= quality_list["Consistency"][0]:
 				consist_point = 1
 			else:
 				consist_point = 0
+
+			"""
+			# Check whether define the column quality, if yes, add column accuarcy in the quality formula
+			"""
+			if column_form is not None and key in column_form and col in column_form[key]:
+				col_list = column_form[key][col]
+				accuracy = (col_list['Accuracy'][2]/data.total_records)*100
+				print("accuracy:"+ str(accuracy))
+				if accuracy >= col_list['Accuracy'][0]:
+					acc_point = 1
+				else:
+					acc_point = 0
+
+				quality_dic[int(key)][col]= complet_point*col_list["Completeness"][0]+ \
+				unique_point*col_list["Uniqueness"][0]+consist_point* col_list["Consistency"][0]+\
+				acc_point*col_list["Accuracy"][1]
+				continue
+
 
 			quality_dic[int(key)][col]= complet_point*quality_list["Completeness"][1]+ \
 			unique_point*quality_list["Uniqueness"][1]+consist_point* quality_list["Consistency"][1]
@@ -544,7 +570,99 @@ def column_quality(request,ID,col):
 	sample_list = list(data.sample)
 	row = (data.sample)[sample_list[random.randint(0,len(sample_list)-1)]]
 	context["sample"] = row[col]
-	context["types"] = ["Date","Other"]
+	context["types"] = ["Date","Age","Other","Country"]
+	context["choices"]= [0,10,20,30,40,50,60,70,80,90,100]
+
+	ip = get_ip(request)
+	ip_quality = ip+"_quality"
+	quality_list = cache.get(ip_quality)
+	if quality_list == None:
+		return redirect("formula")
+	context['complet'] = quality_list["Completeness"][0]
+	context['uniqueness'] = quality_list["Uniqueness"][0]
+	context['consist'] = quality_list["Consistency"][0]
 	template = loader.get_template('column_quality.html')
 	return HttpResponse(template.render(context,request))
+
+def column_add(request,ID,col):
+	ip = get_ip(request)
+	ip_quality = ip+"_quality"
+	quality_list = cache.get(ip_quality)
+	if quality_list == None:
+		return redirect("formula")
+
+	complet_weight =  request.POST.get('c_c_w','')
+	complet_weight = int(complet_weight) if len(complet_weight) != 0 else 0
+
+	uniqueness_weight = request.POST.get('u_w','')
+	uniqueness_weight = int(uniqueness_weight) if len(uniqueness_weight) != 0 else 0
+
+	consistency_weight = request.POST.get('c_con_w','')
+	consistency_weight = int(consistency_weight) if len(consistency_weight) != 0 else 0
+
+	accuracy_rate = request.POST.get('c_a','')
+	accuracy_rate = float(accuracy_rate) if len(accuracy_rate) != 0 else 0
+
+	accuracy_weight = request.POST.get('c_a_w','')
+	accuracy_weight = float(accuracy_weight) if len(accuracy_weight) != 0 else 0
+
+
+	if complet_weight+uniqueness_weight+consistency_weight+accuracy_weight != 100 :
+		messages.warning(request, "The sum of weight must be equal to 100. Please write again ")
+		return redirect(request.META.get('HTTP_REFERER', '..'))
+
+	column_type = request.POST.get('column_type','')
+	data = Dataset.objects.get(id = ID)
+	df = pd.read_csv(data.host_link,encoding = 'ISO-8859-1')
+	column = df[col].tolist()
+	num_accuracy = 0
+	if column_type == 'Date':
+		for c in column:
+			try:
+				date = parser.parse(c)
+				if date <  datetime.now():
+					num_accuracy +=1
+			except Exception as e:
+				#print(e)
+				continue
+	elif column_type == 'Age':
+		for c in column:
+			if not isinstance(c,str):
+				c = str(c)
+			numbers_list = re.findall(r'\d+', c)
+			if len(numbers_list) == 0:
+				continue
+			elif len(numbers_list) == 1 and 0<= float(numbers_list[0]) < 120:
+				num_accuracy +=1
+			elif len(numbers_list) == 2 and 0<= float(numbers_list[0]) < 120 and \
+				0 <= float(numbers_list[1]) < 120 and float(numbers_list[1]) > float(numbers_list[0]):
+				num_accuracy +=1
+	elif column_type == 'Country':
+		for c in column:
+			if is_valid_country_name(c):
+				num_accuracy +=1
+
+
+
+
+	if num_accuracy > 0:
+		#Check whether cache store the column quality formula
+		column_acc = cache.get(ip+"_column_Quality")
+		if column_acc == None:
+			column_acc = {}
+
+		if ID in column_acc:
+			column_acc[ID][col]={"Accuracy":[accuracy_rate,accuracy_weight,num_accuracy],
+								"Completeness":[complet_weight],
+								"Uniqueness":[uniqueness_weight],
+								"Consistency":[consistency_weight]}
+		else:
+			column_acc[ID]={col:{"Accuracy":[accuracy_rate,accuracy_weight,num_accuracy],
+								"Completeness":[complet_weight],
+								"Uniqueness":[uniqueness_weight],
+								"Consistency":[consistency_weight]}}
+
+		cache.set(ip+"_column_Quality",column_acc)
+
+	return redirect(data_quality)  
 

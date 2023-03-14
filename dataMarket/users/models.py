@@ -144,6 +144,19 @@ class Dataset(models.Model):
 
 	def __str__(self) -> str:
 		return self.title
-#return self.title + ' ... ' + str(self.pub_date)
 
+class Date(models.Model):
+	dataset_id = models.OneToOneField(
+		Dataset, 
+		primary_key=True, 
+		on_delete=models.CASCADE,
+	)
 
+	column_name = models.CharField(
+		max_length=100,
+		blank=False,
+	)
+
+	datetime = models.JSONField(
+		blank=True,
+	)
